@@ -1,0 +1,57 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "790656d52b044abc444d984113f2cf1b",
+    "packages": [
+        {
+            "name": "ocallit/sqler",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ocallit/Sqler.git",
+                "reference": "fde4f4e4a16d6ac81f32cedf31a741c82543d1d1"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ocallit/Sqler/zipball/fde4f4e4a16d6ac81f32cedf31a741c82543d1d1",
+                "reference": "fde4f4e4a16d6ac81f32cedf31a741c82543d1d1",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mysqli": "*",
+                "php": "^8.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ocallit\\Sqler\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A php sql builder, helpers and mysqli wrapper",
+            "support": {
+                "issues": "https://github.com/ocallit/Sqler/issues",
+                "source": "https://github.com/ocallit/Sqler/tree/1.0.1"
+            },
+            "time": "2025-01-20T23:07:49+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^8.2",
+        "ext-mysqli": "*"
+    },
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
+}

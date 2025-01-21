@@ -1,0 +1,16 @@
+{
+  "name": "ocallit/jqgrider",
+  "description": "Util functions for jqGrid",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "php": "^8.2",
+    "ocallit/sqler": "*",
+    "ext-mysqli": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ocallit\\JqGrider\\": "src/"
+    }
+  }
+}
