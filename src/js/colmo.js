@@ -13,7 +13,7 @@ var jqGridTemplates = {
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
         cellAttributes: function(rowId, cellValue, rawObject, cm, rdata) {return cellValue < 0 ? 'class="negativo"' : '';},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 127, minValue: -128}
     },
 
@@ -24,7 +24,7 @@ var jqGridTemplates = {
         sorttype: 'integer',
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 255, minValue: 0}
     },
 
@@ -36,7 +36,7 @@ var jqGridTemplates = {
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
         cellAttributes: function(rowId, cellValue, rawObject, cm, rdata) {return cellValue < 0 ? 'class="negativo"' : '';},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 32767, minValue: -32768}
     },
 
@@ -47,7 +47,7 @@ var jqGridTemplates = {
         sorttype: 'integer',
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 65535, minValue: 0}
     },
 
@@ -59,7 +59,7 @@ var jqGridTemplates = {
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
         cellAttributes: function(rowId, cellValue, rawObject, cm, rdata) {return cellValue < 0 ? 'class="negativo"' : '';},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 8388607, minValue: -8388608}
     },
 
@@ -70,7 +70,7 @@ var jqGridTemplates = {
         firstsortorder:'desc',
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 16777215, minValue: 0}
     },
 
@@ -82,7 +82,7 @@ var jqGridTemplates = {
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
         cellAttributes: function(rowId, cellValue, rawObject, cm, rdata) {return cellValue < 0 ? 'class="negativo"' : '';},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 2147483647, minValue: -2147483648}
     },
 
@@ -93,7 +93,7 @@ var jqGridTemplates = {
         firstsortorder:'desc',
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 4294967295, minValue: 0}
     },
 
@@ -105,7 +105,7 @@ var jqGridTemplates = {
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
         cellAttributes: function(rowId, cellValue, rawObject, cm, rdata) {return cellValue < 0 ? 'class="negativo"' : '';},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 9223372036854775807, minValue: -9223372036854775808}
     },
 
@@ -116,7 +116,7 @@ var jqGridTemplates = {
         firstsortorder:'desc',
         formatter: 'integer',
         formatoptions: {thousandsSeparator: ',', defaultValue: '0'},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules:{integer:true, maxValue: 18446744073709551615, minValue: 0}
     },
 
@@ -127,9 +127,9 @@ var jqGridTemplates = {
         sorttype: 'number',
         firstsortorder:'desc',
         formatter: 'number',
-        formatoptions: {decimalSeparator: '.', thousandsSeparator: ',', decimalPlaces: 3, defaultValue: '0.00', prefix: "", sufix: ""},
+        formatoptions: {decimalSeparator: '.', thousandsSeparator: ',', decimalPlaces: 2, defaultValue: '0.00', prefix: "", sufix: ""},
         cellAttributes: function(rowId, cellValue, rawObject, cm, rdata) {return cellValue < 0 ? 'class="negativo"' : '';},
-        searchoptions: { sopt: ['eq','ne','lt','le','gt','ge'] },
+        searchoptions: { sopt: ['ge','eq','le','ne','gt','lt'] },
         editrules: {number:true,maxValue: 99999999.99, minValue: -99999999.99, step: 0.01}
     },
 
@@ -328,6 +328,8 @@ function colmoAddSelect(keyValue) {
 }
 
 var jqGUtil = {
+    version: '1.0.0',
+
     addSearch: function (data, selectColumns) {
     var colLength = selectColumns.length;
     var selectOptions = {};
@@ -509,22 +511,22 @@ var jqGUtil = {
         var $grid = $(ev.target);
         var userData = $grid.jqGrid('getGridParam', 'userData');
         if(userData) {
-            var colModel = $grid.jqGrid('getGridParam', 'colModel');
-            var formattedData = {};
-            colModel.forEach(function(col) {
-                if(userData[col.name] !== undefined && col.formatter) {
-                    // Σ, ↑ , ↓
-                    formattedData[col.name] =   $.fn.fmatter.call(
-                        this,
-                        col.formatter,
-                        userData[col.name],
-                        0,
-                        0,
-                        col.formatoptions || {}
-                    );
+            if(!Array.isArray(userData)) {
+                $grid.jqGrid('footerData', 'set', userData, true, 0);
+                return;
+            }
+            let footerTable = $(".ui-jqgrid-ftable", $("#gview_elGridGrid")).find("TBODY");
+            while(footerTable.children().length > 1)
+                footerTable.children().first().remove();
+            let setFirst = true;
+            for(let u of userData) {
+                if(setFirst) {
+                    $grid.jqGrid('footerData', 'set', u, true, 0);
+                    setFirst = false;
+                } else {
+                    $grid.jqGrid('footerData', 'addrow', u, true, 0);
                 }
-            });
-            $grid.jqGrid('footerData', 'set', formattedData, false, 0); // refresh true/false, 0: Don't recalculate totals (default)
+            }
         }
     }
 
