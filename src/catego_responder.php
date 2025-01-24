@@ -3,7 +3,7 @@
 /** @noinspection PhpRedundantOptionalArgumentInspection */
 
 
-require_once __DIR__ . '/../../includes/init.php';
+
 
 $response = ['success' => FALSE];
 $categoria = sTrim($_POST['categoria'] ?? '');
