@@ -110,9 +110,9 @@
         var sortable;
         $.extend(true, settings, typeof options === 'undefined' ? {} : options);
 
-        function getValueById(catego_id) {
+        function getValueById(id) {
             for(var c of catego.values)
-                if(c.catego_id == catego_id)
+                if(c.id == id)
                     return c;
             return null;
         }
@@ -125,9 +125,9 @@
             return parseInt(zIndex, 10) || 1000;
         }
 
-        function _yaExiste(label, catego_id) {
+        function _yaExiste(label, id) {
             for(var c of catego.values)
-                if(c.label == label && (c.catego_id != catego_id || catego_id === null))
+                if(c.label == label && (c.id != id || id === null))
                     return true;
             return false;
         }
@@ -143,7 +143,7 @@
             }
             let tdReorder = settings.reorder ? '<td class="catego_reorder"><i class="fas fa-arrows-alt handle catego-sortable-handle"></i></td>' : "";
             return $(`
-                <tr data-categoid="${value.catego_id}"">
+                <tr data-categoid="${value.id}"">
                     ${tdReorder}
                     ${tdActions}
                     <td class="catego_cell ${value.activo === 'Inactivo' ? ' catego_inactivo' : ''}" data-categomode="read">${value.label}</td>
@@ -179,7 +179,7 @@
         function _createDialog() {
             let addDiv =  settings.add ?
                 ` <div class="catego_dialog_new_catego">
-                        <input type="text" maxlength="32" class="catego_new_catego" style="width:20em"  required placeholder="${catego.label_singular}">
+                        <input type="text" maxlength="32" class="catego_new_catego" style="width:20em"  required placeholder="${catego.label}">
                         <button type="button" class="catego_dialog_add"><i class="fa-solid fa-circle-plus fa-lg" style="color: #008800;"></i><span class="catego-acota">Agregar</span></button>
                   </div>
                 ` :
@@ -251,14 +251,14 @@
             if (confirm('Confirme borrar: ' + currentValue.label )) {
                 $row.remove();
                 for(var i=0, iLen = catego.values.length; i < iLen; i++)
-                    if(catego.values[i].catego_id == currentValue.catego_id) {
+                    if(catego.values[i].id == currentValue.id) {
                         catego.values.splice(i, 1);
                         break;
                     }
                 if(settings.url_delete === null) {
                     return;
                 }
-                let params = {catego_id: $row.data('categoid'), categoria: categoria};
+                let params = {id: $row.data('categoid'), categoria: categoria};
                 $.extend(true, params,settings.param_delete, settings.params);
                 $.ajax({
                     url: settings.url_delete,
@@ -267,7 +267,7 @@
                     success: function(response) {
                         if (response.success) {
                             $row.remove();
-                            $(`#taka option[value="${currentValue.catego_id}"]`).remove();
+                            $(`#taka option[value="${currentValue.id}"]`).remove();
                             update_others();
                         } else {
                             alert(response.error || 'Error al eliminar');
@@ -297,7 +297,7 @@
                     activo: $cell.find('select').val()
                 };
                 if(!newValue.label) {
-                    dialoger().alert('Falto el ' + catego.label_singular);
+                    dialoger().alert('Falto el ' + catego.label);
                     return;
                 }
                 if(_yaExiste(newValue.label, $row.data('categoid'))) {
@@ -316,7 +316,7 @@
                     return;
                 }
                 let params = {
-                    catego_id: currentValue.catego_id,
+                    id: currentValue.id,
                     label: newValue.label,
                     activo:  newValue.activo
                 };
@@ -329,7 +329,7 @@
                         if (response.success) {
                             var $newCell = $(`<td data-categomode="read" ${newValue.activo === 'Inactivo' ? 'class="catego_inactivo"' : ''}>${newValue.label}</td>`);
                             $editCell.replaceWith($newCell);
-                            const $option = $(`#taka option[value="${currentValue.catego_id}"]`);
+                            const $option = $(`#taka option[value="${currentValue.id}"]`);
                             if(newValue.activo === 'Inactivo') {
                                 $option.remove();
                             } else {
@@ -365,7 +365,7 @@
             var newName = _strim($input.val());
             console.log("-x-x-x ADD", _getZIndex($input[0]));
             if (!newName) {
-                dialoger().alert('Falto el ' + catego.label_singular);
+                dialoger().alert('Falto el ' + catego.label);
                 return;
             }
             if(_yaExiste(newName, null)) {
@@ -374,7 +374,7 @@
             }
 
             var newValue = {
-                catego_id: newName,
+                id: newName,
                 label: newName,
                 activo: 'Activo',
             };
@@ -395,7 +395,7 @@
                 success: function(response) {
                     if (response.success) {
                         var newValue = {
-                            catego_id: response.catego_id,
+                            id: response.id,
                             label: newName,
                             activo: 'Activo',
                         };
@@ -403,7 +403,7 @@
                         $dialog.find('.catego_sortable').append($newRow);
                         $input.val('');
                         $('#taka').append($('<option>', {
-                            value: response.catego_id,
+                            value: response.id,
                             text: newName
                         }));
                         update_others();
@@ -481,30 +481,28 @@
 <script>
     var catego_value = {
         "categoria":"productCat",
-        "label_singular":"Uso",
+        "label":"Uso",
         "label_plural":"Usos del Producto",
-        "min_selected":1,
-        "max_selected":1,
         "values": [
-            {catego_id:"2", label:"label #2","activo":"Activo"},
-            {catego_id:"3", label:"label #3", "activo":"Activo"},
-            {catego_id:"4", label:"label #4", "activo":"Activo"},
-            {catego_id:"5", label:"label #5", "activo":"Activo"},
-            {catego_id:"6", label:"label #6", "activo":"Activo"},
-            {catego_id:"7", label:"label #7", "activo":"Activo"},
-            {catego_id:"8", label:"label #8", "activo":"Activo"},
-            {catego_id:"9", label:"label #9", "activo":"Activo"},
-            {catego_id:"10", label:"label #10", "activo":"Activo"},
+            {id:"2", label:"label #2","activo":"Activo"},
+            {id:"3", label:"label #3", "activo":"Activo"},
+            {id:"4", label:"label #4", "activo":"Activo"},
+            {id:"5", label:"label #5", "activo":"Activo"},
+            {id:"6", label:"label #6", "activo":"Activo"},
+            {id:"7", label:"label #7", "activo":"Activo"},
+            {id:"8", label:"label #8", "activo":"Activo"},
+            {id:"9", label:"label #9", "activo":"Activo"},
+            {id:"10", label:"label #10", "activo":"Activo"},
 
-            {catego_id:"12", label:"label #12","activo":"Activo"},
-            {catego_id:"13", label:"label #13", "activo":"Activo"},
-            {catego_id:"14", label:"label #14", "activo":"Activo"},
-            {catego_id:"15", label:"label #15", "activo":"Activo"},
-            {catego_id:"16", label:"label #16", "activo":"Activo"},
-            {catego_id:"17", label:"label #17", "activo":"Activo"},
-            {catego_id:"18", label:"label #18", "activo":"Activo"},
-            {catego_id:"19", label:"label #19", "activo":"Activo"},
-            {catego_id:"20", label:"label #20", "activo":"Activo"},
+            {id:"12", label:"label #12","activo":"Activo"},
+            {id:"13", label:"label #13", "activo":"Activo"},
+            {id:"14", label:"label #14", "activo":"Activo"},
+            {id:"15", label:"label #15", "activo":"Activo"},
+            {id:"16", label:"label #16", "activo":"Activo"},
+            {id:"17", label:"label #17", "activo":"Activo"},
+            {id:"18", label:"label #18", "activo":"Activo"},
+            {id:"19", label:"label #19", "activo":"Activo"},
+            {id:"20", label:"label #20", "activo":"Activo"},
         ]
     }
     var a = new Catego_manager("productCat", catego_value, '#taka');
