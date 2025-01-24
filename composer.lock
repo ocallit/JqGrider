@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "ocallit/sqler",
-            "version": "1.0.1",
+            "version": "1.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ocallit/Sqler.git",
-                "reference": "fde4f4e4a16d6ac81f32cedf31a741c82543d1d1"
+                "reference": "a0a01cbc0013346bc9b2332d83b979515c83f0ff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ocallit/Sqler/zipball/fde4f4e4a16d6ac81f32cedf31a741c82543d1d1",
-                "reference": "fde4f4e4a16d6ac81f32cedf31a741c82543d1d1",
+                "url": "https://api.github.com/repos/ocallit/Sqler/zipball/a0a01cbc0013346bc9b2332d83b979515c83f0ff",
+                "reference": "a0a01cbc0013346bc9b2332d83b979515c83f0ff",
                 "shasum": ""
             },
             "require": {
@@ -37,21 +37,21 @@
             "description": "A php sql builder, helpers and mysqli wrapper",
             "support": {
                 "issues": "https://github.com/ocallit/Sqler/issues",
-                "source": "https://github.com/ocallit/Sqler/tree/1.0.1"
+                "source": "https://github.com/ocallit/Sqler/tree/1.0.2"
             },
-            "time": "2025-01-20T23:07:49+00:00"
+            "time": "2025-01-24T15:31:30+00:00"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2",
         "ext-mysqli": "*"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

@@ -1,0 +1,108 @@
+    .iconer_fontawsome-container {
+        display: inline-block;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .iconer_fontawsome-preview {
+        font-size: 24px;
+        margin-right: 8px;
+        min-width: 30px;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .iconer_fontawsome-fieldset {}
+    .iconer_fontawsome-legend {font-weight: normal;font-size: 1em;}
+    .iconer_fontawsome-selector {
+        position: absolute;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 8px;
+        display: none;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 1000;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .iconer_fontawsome-selector .iconer_fontawsome-option {
+        padding: 6px;
+        cursor: pointer;
+        display: inline-block;
+        width: 40px;
+        text-align: center;
+    }
+
+    .iconer_fontawsome-selector .iconer_fontawsome-option:hover {
+        background-color: #f0f0f0;
+    }
+
+    .iconer_fontawsome-button {
+        padding: 5px 10px;
+        background-color: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .iconer_fontawsome-button:hover {
+        background-color: #e9ecef;
+    }
+
+    .iconer_fontawsome-selected {
+        background-color: #e9ecef;
+    }
+
+    .iconer_fontawsome-selector fieldset {
+        margin: 8px 0;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    .iconer_fontawsome-selector legend {
+        padding: 0 5px;
+        font-weight: bold;
+    }
+
+    .iconer_fontawsome-search {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+
+    .iconer_fontawsome-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    .iconer_fontawsome-header {
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .iconer_fontawsome-colors {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .iconer_fontawsome-colors label {color:darkblue;cursor:pointer;}
+
+    .iconer_fontawsome-option i {
+        transition: all 0.2s;
+    }
