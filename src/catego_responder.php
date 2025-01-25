@@ -5,7 +5,7 @@ use Ocallit\Sqler\SqlExecutor;
 
 require_once '../vendor/autoload.php';
 
-$sqlExecutor = new SqlExecutor(['hostname'=>'localhost', 'database' => 'vitex', 'username' => 'vitex', 'password' => 'teisha']);
+$sqlExecutor = new SqlExecutor(['hostname'=>'localhost', 'database' => 'z', 'username' => 'z', 'password' => 'z']);
 
 $catego = new LookupManager($sqlExecutor, $_REQUEST['categoria'] ?? '');
 // header('Content-Type: application/json');
