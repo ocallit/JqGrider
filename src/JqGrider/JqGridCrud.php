@@ -1,6 +1,6 @@
 <?php
 
-namespace Ocallit\JqGrider;
+namespace Ocallit\JqGrider\JqGrider;
 
 use Ocallit\Sqler\SqlExecutor;
 use Ocallit\Sqler\DatabaseMetadata;

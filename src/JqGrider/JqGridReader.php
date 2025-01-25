@@ -2,7 +2,7 @@
 /** @noinspection PhpUnused */
 /** @noinspection SqlNoDataSourceInspection */
 
-namespace Ocallit\JqGrider;
+namespace Ocallit\JqGrider\JqGrider;
 
 use Exception;
 use Ocallit\Sqler\SqlExecutor;

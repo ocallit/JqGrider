@@ -90,10 +90,31 @@ class LookupManager {
      */
     protected function isCategoriaValid(): bool {
         $method = __METHOD__;
-        $this->lookup_registry = $this->sqlExecutor->row(
-          "SELECT /*$method*/ * FROM lookup_registry WHERE tabla = ?",
-          [$this->tableName],
-        );
+        $sql = "SELECT /*$method*/ * FROM lookup_registry WHERE tabla = ?";
+        try {
+            $this->lookup_registry = $this->sqlExecutor->row($sql, [$this->tableName]);
+            return !empty($this->lookup_registry);
+        } catch(Exception $e) {
+            if(!$this->sqlExecutor->is_last_error_table_not_found())
+                throw $e;
+        }
+        $tableSql = "
+            CREATE /*$method*/ TABLE IF NOT EXISTS lookup_registry (
+                id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                tabla VARCHAR(191) NOT NULL,
+                label VARCHAR(191) NOT NULL,
+                plural VARCHAR(191) NULL DEFAULT NULL,
+                activo ENUM ('Activo','Inactivo') NOT NULL DEFAULT 'Activo',
+                orden SMALLINT UNSIGNED NOT NULL DEFAULT 100,
+                registrado DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                registrado_por VARCHAR(16) NOT NULL DEFAULT '?',
+                ultimo_cambio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                ultimo_cambio_por VARCHAR(16) NOT NULL DEFAULT '?',
+                UNIQUE KEY unico(tabla),
+                KEY label(label)
+            )";
+        $this->sqlExecutor->query($tableSql);
+        $this->lookup_registry = $this->sqlExecutor->row($sql, [$this->tableName]);
         return !empty($this->lookup_registry);
     }
 
@@ -205,7 +226,7 @@ class LookupManager {
             return ['success' => FALSE, 'error' => 'Sin Permiso'];
         $method = __METHOD__;
         $tableName = SqlUtils::fieldIt($this->tableName);
-        $query = "SELECT /*$method*/ id, label, activo FROM $tableName WHERE activo = 'Activo' ORDER BY orden, label";
+        $query = "SELECT /*$method*/ id, label, activo FROM $tableName ORDER BY orden, label";
         try {
             $result = $this->sqlExecutor->array($query);
         } catch(Exception $e) {

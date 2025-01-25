@@ -2,7 +2,7 @@
 /** @noinspection PhpComposerExtensionStubsInspection */
 /** @noinspection PhpUnused */
 
-namespace Ocallit\JqGrider;
+namespace Ocallit\JqGrider\JqGrider;
 
 /**
  * jQGrid filter and _searchField to sql where

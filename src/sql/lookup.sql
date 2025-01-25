@@ -9,7 +9,8 @@ CREATE TABLE lookup_registry (
     registrado_por VARCHAR(16) NOT NULL DEFAULT '?',
     ultimo_cambio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     ultimo_cambio_por VARCHAR(16) NOT NULL DEFAULT '?',
-    UNIQUE KEY unico(tabla)
+    UNIQUE KEY unico(tabla),
+    KEY label(label)
 );
 
 CREATE TABLE lookup (

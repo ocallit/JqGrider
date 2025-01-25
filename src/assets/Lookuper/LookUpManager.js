@@ -15,12 +15,12 @@ function LookUpManager(categoria, element, options, catego) {
         display: null,
         hidden: null,
 
-        url: "catego_responder.php",
+        url: "lookup_responder.php",
         method: 'POST',
-        url_reorder: "catego_responder.php",
-        url_delete: "catego_responder.php",
-        url_update: "catego_responder.php",
-        url_add: "catego_responder.php",
+        url_reorder: "lookup_responder.php",
+        url_delete: "lookup_responder.php",
+        url_update: "lookup_responder.php",
+        url_add: "lookup_responder.php",
         param_reorder:{accion:'reorder'},
         param_delete: {accion:'delete'},
         param_update: {accion:'update'},
@@ -50,19 +50,19 @@ function LookUpManager(categoria, element, options, catego) {
     function _createTableRow(value) {
         let $tr = $(`<TR data-categoid="${value.id}">`).data('catego', value).data('categoid', value.id).data("id", value.id);
         if(settings.reorder) {
-            $tr.append($(`<td data-categoid="${value.id}" class="catego_reorder"><i data-categoid="${value.id}" class="fas fa-arrows-alt handle catego-sortable-handle"></i></td>`) );
+            $tr.append($(`<td data-categoid="${value.id}" class="lookup-reorder"><i data-categoid="${value.id}" class="fas fa-arrows-alt handle lookup-sortable-handle"></i></td>`) );
         }
 
         if(settings.edit || settings.delete) {
-            let tdActions = '<td class="catego_action">';
+            let tdActions = '<td class="lookup-action">';
             if(settings.edit)
-                tdActions += '<div><i class="fa-solid fa-pencil fa-lg catego-ButtonEdit catego-pointer catego-Button catego-ButtonOff" style="color: #0000ff;"></i><p class="catego-acota">Editar</p></div>';
+                tdActions += '<div><i class="fa-solid fa-pencil fa-lg lookup-ButtonEdit lookup-pointer lookup-Button lookup-ButtonOff" style="color: #0000ff;"></i><p class="lookup-acota">Editar</p></div>';
             if(settings.delete)
-                tdActions += `<div data-categoid="${value.id}"><i data-categoid="${value.id}" class="fa-regular fa-trash-can fa-lg catego-ButtonDelete catego-pointer catego-Button catego-ButtonOn" style="color: #800040;"></i><p class="catego-acota">Borrar</p></div>`;
+                tdActions += `<div data-categoid="${value.id}"><i data-categoid="${value.id}" class="fa-regular fa-trash-can fa-lg lookup-ButtonDelete lookup-pointer lookup-Button lookup-ButtonOn" style="color: #800040;"></i><p class="lookup-acota">Borrar</p></div>`;
             $tr.append(tdActions);
         }
 
-        $tr.append($(`<td class="catego_cell ${value.activo === 'Inactivo' ? ' catego_inactivo' : ''}" data-categomode="read">${value.label}</td>`))
+        $tr.append($(`<td class="lookup-cell ${value.activo === 'Inactivo' ? ' lookup-inactivo' : ''}" data-categomode="read">${value.label}</td>`))
 
         return $tr;
     }
@@ -73,20 +73,20 @@ function LookUpManager(categoria, element, options, catego) {
 
         return $(`
             <td data-categomode="edit">
-                <input type="text" maxlength="32" style="width:20em" class="catego_edit_input" required value="${value.label}">
-                <select class="catego_select">
+                <input type="text" maxlength="32" style="width:20em" class="lookup-edit_input" required value="${value.label}">
+                <select class="lookup-select">
                     <option ${value.activo === 'Activo' ? 'selected' : ''}>Activo</option>
-                    <option ${value.activo === 'Inactivo' ? 'selected' : ''} class="catego_rojo">Inactivo</option>
+                    <option ${value.activo === 'Inactivo' ? 'selected' : ''} class="lookup-rojo">Inactivo</option>
                 </select>
                 |
-                <button type="button" class="catego_save catego-pointer"><i class="fa-regular fa-floppy-disk" style="color:darkgreen"></i></button>
-                <button type="button" class="catego_cancel catego-pointer"><i class="fa-solid fa-ban" style="color:red"></i></button>
+                <button type="button" class="lookup-save lookup-pointer"><i class="fa-regular fa-floppy-disk" style="color:darkgreen"></i></button>
+                <button type="button" class="lookup-cancel lookup-pointer"><i class="fa-solid fa-ban" style="color:red"></i></button>
             </td>
         `);
     }
 
     function _createTable() {
-        var $table = $('<table class="catego-tabler"><tbody class="catego_sortable"></tbody></table>');
+        var $table = $('<table class="lookup-tabler"><tbody class="lookup-sortable"></tbody></table>');
         var $tbody = $table.find('tbody');
         var values = catego.values;
         for(var c in values)
@@ -97,9 +97,9 @@ function LookUpManager(categoria, element, options, catego) {
 
     function _createDialog() {
         let addDiv =  settings.add ?
-            ` <div class="catego_dialog_new_catego">
-                <input type="text" maxlength="32" class="catego_new_catego" style="width:20em"  required placeholder="${catego.label}">
-                <button type="button" class="catego_dialog_add"><i class="fa-solid fa-circle-plus fa-lg" style="color: #008800;"></i><span class="catego-acota">Agregar</span></button>
+            ` <div class="lookup-dialog_new_catego">
+                <input type="text" maxlength="32" class="lookup-new_catego" style="width:20em"  required placeholder="${catego.label}">
+                <button type="button" class="lookup-dialog_add"><i class="fa-solid fa-circle-plus fa-lg" style="color: #008800;"></i><span class="lookup-acota">Agregar</span></button>
               </div>
                 ` :
             "";
@@ -107,29 +107,29 @@ function LookUpManager(categoria, element, options, catego) {
             `<div style="font-size:0.8em;color:gray;text-align:center;font-style:italic;font-family:Courier New, Courier, monospace;
                 display:flex;flex-direction: row;flex-wrap: wrap;justify-content: space-between;align-items: center;">
                 <div><i style="color:black" class="fas fa-arrows-alt handle"></i> Arrastra reordena.</div>
-                <div><button type="button" class="catego_sort_alpha" title="Ordenar alfabéticamente" style="cursor: pointer"><i class="fas fa-sort-alpha-down"></i></button></div>
+                <div><button type="button" class="lookup-sort_alpha" title="Ordenar alfabéticamente" style="cursor: pointer"><i class="fas fa-sort-alpha-down"></i></button></div>
             </div>`
             : "";
 
         var $dialog = $(`
-            <dialog class="catego_dialog" style="z-index:1000;resize: both;min-width: 200px;min-height: 200px;">
-                <div class="catego_dialog_title" style="cursor: grab;user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
-                    <div><span class="catego_dialog_title_frase">${catego.label_plural}</span></div>
-                    <div><button type="button"  class="catego_dialog_close">×</button></div>
+            <dialog class="lookup-dialog" style="z-index:1000;resize: both;min-width: 200px;min-height: 200px;">
+                <div class="lookup-dialog_title" style="cursor: grab;user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+                    <div><span class="lookup-dialog_title_frase">${catego.label_plural}</span></div>
+                    <div><button type="button"  class="lookup-dialog_close">×</button></div>
                 </div>
-                <div class="catego_dialog_content">
+                <div class="lookup-dialog_content">
                     ${addDiv}
                     ${reorderHelp}
                 </div>
             </dialog>
         `);
-        $dialog.find('.catego_dialog_content').append(_createTable());
+        $dialog.find('.lookup-dialog_content').append(_createTable());
         return $dialog;
     }
 
     function _initializeSortable($tbody) {
         sortable = new Sortable($tbody[0], {
-            handle: '.catego-sortable-handle',
+            handle: '.lookup-sortable-handle',
             animation: 150,
             dataIdAttr: 'data-categoid',
             onEnd: function() {
@@ -139,7 +139,7 @@ function LookUpManager(categoria, element, options, catego) {
     }
 
     function _handleAlphaSort() {
-        const $tbody = $('.catego_sortable');
+        const $tbody = $('.lookup-sortable');
 
         // Check if any row is being edited
         if($tbody.find('[data-categomode="edit"]').length > 0) {
@@ -239,7 +239,7 @@ function LookUpManager(categoria, element, options, catego) {
         var currentValue = getValueById($row.data('categoid'));
         var $editCell = _createEditableCell(currentValue);
         $cellToEdit.replaceWith($editCell);
-        _selectApplySelectedClass(".catego_select");
+        _selectApplySelectedClass(".lookup-select");
 
         function saveEdit() {
             var $cell = $row.find('[data-categomode="edit"]');
@@ -277,7 +277,7 @@ function LookUpManager(categoria, element, options, catego) {
                 data: params,
                 success: function(response) {
                     if (response.success) {
-                        var $newCell = $(`<td data-categomode="read" ${newValue.activo === 'Inactivo' ? 'class="catego_inactivo"' : ''}>${newValue.label}</td>`);
+                        var $newCell = $(`<td data-categomode="read" ${newValue.activo === 'Inactivo' ? 'class="lookup-inactivo"' : ''}>${newValue.label}</td>`);
                         $editCell.replaceWith($newCell);
                         const $option = $(`#taka option[value="${currentValue.id}"]`);
                         if(newValue.activo === 'Inactivo') {
@@ -298,27 +298,27 @@ function LookUpManager(categoria, element, options, catego) {
             });
         }
 
-        $editCell.find('.catego_save').on('click', saveEdit);
+        $editCell.find('.lookup-save').on('click', saveEdit);
         $editCell.find('input').on('keypress', function(e) {
             if (e.which === 13) { // Enter key
                 saveEdit();
             }
         });
 
-        $editCell.find('.catego_cancel').on('click', function() {
+        $editCell.find('.lookup-cancel').on('click', function() {
             _cancelEdit($editCell, currentValue);
         });
     }
 
     function _cancelEdit($editCell, originalValue) {
-        var $readCell = $(`<td data-categomode="read" ${originalValue.activo === 'Inactivo' ? 'class="catego_inactivo"' : ''}>${originalValue.label}</td>`);
+        var $readCell = $(`<td data-categomode="read" ${originalValue.activo === 'Inactivo' ? 'class="lookup-inactivo"' : ''}>${originalValue.label}</td>`);
         $editCell.replaceWith($readCell);
     }
 
     function _handleAdd($dialog) {
         if(!settings.add)
             return;
-        var $input = $dialog.find('input.catego_new_catego');
+        var $input = $dialog.find('input.lookup-new_catego');
         var newName = _strim($input.val());
         if (!newName) {
             showErrorDialog('Falto el ' + catego.label);
@@ -339,7 +339,7 @@ function LookUpManager(categoria, element, options, catego) {
         if(settings.url_add === null) {
             catego.values.push(newValue);
             var $newRow = _createTableRow(newValue);
-            $dialog.find('.catego_sortable').prepend($newRow);
+            $dialog.find('.lookup-sortable').prepend($newRow);
             $input.val('');
             return;
         }
@@ -361,7 +361,7 @@ function LookUpManager(categoria, element, options, catego) {
                     };
                     catego.values.push(newValue);
                     var $newRow = _createTableRow(newValue);
-                    $dialog.find('.catego_sortable').append($newRow);
+                    $dialog.find('.lookup-sortable').append($newRow);
                     $input.val('');
                     $('#taka').append($('<option>', {
                         value: response.id,
@@ -396,10 +396,10 @@ function LookUpManager(categoria, element, options, catego) {
     function update_local() {
         // esta toma la tabla y la pasa a catego.values
         var newValues = [];
-        $('.catego_sortable tr').each(function(index) {
+        $('.lookup-sortable tr').each(function(index) {
             var $row = $(this);
             newValues.push({
-                activo: $row.find('[data-categomode="read"]').hasClass('catego_inactivo') ? 'Inactivo' : 'Activo',
+                activo: $row.find('[data-categomode="read"]').hasClass('lookup-inactivo') ? 'Inactivo' : 'Activo',
                 orden: index + 1
             });
         });
@@ -408,7 +408,7 @@ function LookUpManager(categoria, element, options, catego) {
         // @TODO reemplazar hidden values
         // @TODO reemplazar readonly span
         // hace un trigger
-        $element.trigger('catego_change', this);
+        $element.trigger('lookup-change', this);
     }
     function update() {}
     function update_others() {}
@@ -416,30 +416,30 @@ function LookUpManager(categoria, element, options, catego) {
     function manage() {
         var $dialog = _createDialog();
         $('body').append($dialog);
-        _initializeSortable($dialog.find('.catego_sortable'));
+        _initializeSortable($dialog.find('.lookup-sortable'));
 
-         $dialog.on('click', '.catego_dialog_close', function() {
-             $dialog.off('click', '.catego_dialog_close')
-                 .off('click', '.catego-ButtonDelete')
-                 .off('click', '.catego-ButtonEdit')
-                 .off('click', '.catego_dialog_add')
-                 .off('click', '.catego_sort_alpha')
-                 .off('keypress', '.catego_new_catego')
-                 .off('mousedown', '.catego_dialog_title')
+         $dialog.on('click', '.lookup-dialog_close', function() {
+             $dialog.off('click', '.lookup-dialog_close')
+                 .off('click', '.lookup-ButtonDelete')
+                 .off('click', '.lookup-ButtonEdit')
+                 .off('click', '.lookup-dialog_add')
+                 .off('click', '.lookup-sort_alpha')
+                 .off('keypress', '.lookup-new_catego')
+                 .off('mousedown', '.lookup-dialog_title')
                  .remove();
          });
-        $dialog.on('click', '.catego-ButtonDelete', function() {_handleDelete($(this).closest('tr'));});
-        $dialog.on('click', '.catego-ButtonEdit', function() {_handleEdit($(this).closest('tr'));});
-        $dialog.on('click', '.catego_dialog_add', function() {_handleAdd($dialog);});
-        $dialog.on('click', '.catego_sort_alpha', function() {_handleAlphaSort();});
-        $dialog.on('keypress', '.catego_new_catego', function(e) {
+        $dialog.on('click', '.lookup-ButtonDelete', function() {_handleDelete($(this).closest('tr'));});
+        $dialog.on('click', '.lookup-ButtonEdit', function() {_handleEdit($(this).closest('tr'));});
+        $dialog.on('click', '.lookup-dialog_add', function() {_handleAdd($dialog);});
+        $dialog.on('click', '.lookup-sort_alpha', function() {_handleAlphaSort();});
+        $dialog.on('keypress', '.lookup-new_catego', function(e) {
             if (e.which === 13) { // Enter key code
                 _handleAdd($dialog);
             }
         });
-        $dialog.on('mousedown', '.catego_dialog_title', function(e) {
+        $dialog.on('mousedown', '.lookup-dialog_title', function(e) {
             $(this).css('cursor', 'grabbing');
-            const $dialogElement = $(this).closest('.catego_dialog');
+            const $dialogElement = $(this).closest('.lookup-dialog');
             const startX = e.pageX // - $dialogElement[0].offsetLeft;
             const startY = e.pageY // - $dialogElement[0].offsetTop;
 
@@ -451,7 +451,7 @@ function LookUpManager(categoria, element, options, catego) {
             function mouseUpHandler() {
                 document.removeEventListener('mousemove', mouseMoveHandler);
                 document.removeEventListener('mouseup', mouseUpHandler);
-                $('.catego_dialog_title').css('cursor', 'grab');
+                $('.lookup-dialog_title').css('cursor', 'grab');
             }
 
             document.addEventListener('mousemove', mouseMoveHandler);
@@ -461,13 +461,13 @@ function LookUpManager(categoria, element, options, catego) {
     }
 
     function close() {
-        $dialog.off('click', '.catego_dialog_close')
-            .off('click', '.catego-ButtonDelete')
-            .off('click', '.catego-ButtonEdit')
-            .off('click', '.catego_dialog_add')
-            .off('click', '.catego_sort_alpha')
-            .off('keypress', '.catego_new_catego')
-            .off('mousedown', '.catego_dialog_title')
+        $dialog.off('click', '.lookup-dialog_close')
+            .off('click', '.lookup-ButtonDelete')
+            .off('click', '.lookup-ButtonEdit')
+            .off('click', '.lookup-dialog_add')
+            .off('click', '.lookup-sort_alpha')
+            .off('keypress', '.lookup-new_catego')
+            .off('mousedown', '.lookup-dialog_title')
             .remove();
     }
     function fetchData() {
@@ -490,7 +490,7 @@ function LookUpManager(categoria, element, options, catego) {
     }
 
     function showErrorDialog(message) {
-        var $dialog = $('<dialog class="catego_dialog"><div class="catego_dialog_title">Error</div><div class="catego_dialog_content">' + message + '</div></dialog>');
+        var $dialog = $('<dialog class="lookup-dialog"><div class="lookup-dialog_title">Error</div><div class="lookup-dialog_content">' + message + '</div></dialog>');
         $('body').append($dialog);
         $dialog[0].showModal();
         $dialog.on('click', function () {
