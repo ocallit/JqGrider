@@ -8,10 +8,9 @@ use Exception;
 use Ocallit\Sqler\SqlExecutor;
 use Ocallit\Sqler\SqlUtils;
 
-class CategoResponder {
+class LookupManager {
     protected SqlExecutor $sqlExecutor;
-    protected string $tableName = 'lookup';
-    protected string $categoria;
+    protected string $tableName;
     protected array $lookup_registry = [];
     protected bool $canList;
     protected bool $canAdd;
@@ -19,8 +18,9 @@ class CategoResponder {
     protected bool $canDelete;
     protected bool $canReorder;
 
-    public function __construct(SqlExecutor $sqlExecutor, bool $canList = true, bool $canAdd = true, bool $canEdit = true, bool $canDelete = true, bool $canReorder = true) {
+    public function __construct(SqlExecutor $sqlExecutor, $tableName = '', bool $canList = true, bool $canAdd = true, bool $canEdit = true, bool $canDelete = true, bool $canReorder = true) {
         $this->sqlExecutor = $sqlExecutor;
+        $this->tableName = $tableName;
         $this->canList = $canList;
         $this->canAdd = $canAdd;
         $this->canEdit = $canEdit;
@@ -36,16 +36,23 @@ class CategoResponder {
      */
     public function handleRequest(array $request): array {
         try {
-            $this->categoria = $request['categoria'] ?? '';
-            if(empty($this->categoria)) {
+            $categoria = $request['categoria'] ?? '';
+            if(empty($categoria)) {
                 return ['success' => FALSE, 'error' => 'Catálogo no proporcionado'];
+            }
+            if($categoria !== $this->tableName) {
+                return ['success' => FALSE, 'error' => 'Catálogo inválido'];
             }
             if(!$this->isCategoriaValid()) {
                 return ['success' => FALSE, 'error' => 'Catálogo no reconocido'];
             }
         } catch(Exception) {
-
-            return ['success' => FALSE, 'error' => 'Problemas en la base de datos, intente mas tarde.'];
+            $errorNo = '(' . $this->sqlExecutor->getLastErrorNumber() . ')';
+            return ['success' => FALSE, 'error' => "Problemas en la base de datos para determinar el catálogo, intente mas tarde $errorNo",
+              'error_no' => $this->sqlExecutor->getLastErrorNumber(),
+              'error_log' =>  $this->sqlExecutor->getErrorLog(),
+              'php_last_error' => error_get_last()
+            ];
         }
 
         $action = $request['accion'] ?? '';
@@ -56,7 +63,7 @@ class CategoResponder {
                 'delete' => $this->deleteCategory($request),
                 'reorder' => $this->reorderCategories($request),
                 'list' => $this->list(),
-                default => ['success' => FALSE, 'error' => 'Invalid action'],
+                default => ['success' => FALSE, 'error' => 'Solicitud no reconocida'],
             };
         } catch(Exception) {
             $errorNo = '(' . $this->sqlExecutor->getLastErrorNumber() . ')';
@@ -69,7 +76,6 @@ class CategoResponder {
                 return ['success' => false,
                   'error' => 'No se puede borrar porque tiene registros relacionados. Márquelo como Inactivo.'];
             } else {
-                // Generic user-friendly error message for other errors
                 return ['success' => false,
                   'error' => "Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde. $errorNo"];
             }
@@ -85,8 +91,8 @@ class CategoResponder {
     protected function isCategoriaValid(): bool {
         $method = __METHOD__;
         $this->lookup_registry = $this->sqlExecutor->row(
-          "SELECT /*$method*/ * FROM lookup_registry WHERE label = ?",
-          [$this->categoria]
+          "SELECT /*$method*/ * FROM lookup_registry WHERE tabla = ?",
+          [$this->tableName],
         );
         return !empty($this->lookup_registry);
     }
@@ -177,7 +183,7 @@ class CategoResponder {
         }
         $order = $request['order'] ?? [];
         if(empty($order)) {
-            return ['success' => FALSE, 'error' => 'Order is required'];
+            return ['success' => FALSE, 'error' => 'No llego el orden nuevo'];
         }
         $method = __METHOD__;
         $tableName = SqlUtils::fieldIt($this->tableName);
@@ -212,7 +218,8 @@ class CategoResponder {
         }
 
         return [
-          'categoria' => $this->categoria,
+          'success' => TRUE,
+          'categoria' => $this->tableName,
           'label' => $this->lookup_registry['label'],
           'label_plural' => $this->lookup_registry['plural'] ?? $this->lookup_registry['label'],
           'values' => $result,

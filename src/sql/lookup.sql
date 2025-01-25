@@ -1,5 +1,6 @@
 CREATE TABLE lookup_registry (
     id MEDIUMINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    tabla VARCHAR(191) NOT NULL,
     label VARCHAR(191) NOT NULL,
     plural VARCHAR(191) NULL DEFAULT NULL,
     activo ENUM ('Activo','Inactivo') NOT NULL DEFAULT 'Activo',
@@ -8,7 +9,7 @@ CREATE TABLE lookup_registry (
     registrado_por VARCHAR(16) NOT NULL DEFAULT '?',
     ultimo_cambio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     ultimo_cambio_por VARCHAR(16) NOT NULL DEFAULT '?',
-    UNIQUE KEY unico(label)
+    UNIQUE KEY unico(tabla)
 );
 
 CREATE TABLE lookup (
