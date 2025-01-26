@@ -10,7 +10,8 @@ function LookUpManager(categoria, element, options, catego) {
         add: true,
         edit:true,
         delete: true,
-
+        dialogClass: 'lookup-dialog',
+        dialogTitleClass: 'lookup-dialog_title',
         select: null,
         display: null,
         hidden: null,
@@ -112,8 +113,8 @@ function LookUpManager(categoria, element, options, catego) {
             : "";
 
         var $dialog = $(`
-            <dialog class="lookup-dialog" style="z-index:1000;resize: both;min-width: 200px;min-height: 200px;">
-                <div class="lookup-dialog_title" style="cursor: grab;user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+            <dialog class="${settings.dialogClass}" style="z-index:1000;resize: both;min-width: 200px;min-height: 200px;">
+                <div class="${settings.dialogTitleClass}" style="cursor: grab;user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
                     <div><span class="lookup-dialog_title_frase">${catego.label_plural}</span></div>
                     <div><button type="button"  class="lookup-dialog_close">×</button></div>
                 </div>
@@ -425,7 +426,7 @@ function LookUpManager(categoria, element, options, catego) {
                  .off('click', '.lookup-dialog_add')
                  .off('click', '.lookup-sort_alpha')
                  .off('keypress', '.lookup-new_catego')
-                 .off('mousedown', '.lookup-dialog_title')
+                 .off('mousedown', '.' + settings.dialogTitleClass)
                  .remove();
          });
         $dialog.on('click', '.lookup-ButtonDelete', function() {_handleDelete($(this).closest('tr'));});
@@ -437,9 +438,9 @@ function LookUpManager(categoria, element, options, catego) {
                 _handleAdd($dialog);
             }
         });
-        $dialog.on('mousedown', '.lookup-dialog_title', function(e) {
+        $dialog.on('mousedown', '.' + settings.dialogTitleClass, function(e) {
             $(this).css('cursor', 'grabbing');
-            const $dialogElement = $(this).closest('.lookup-dialog');
+            const $dialogElement = $(this).closest('.' + settings.dialogClass);
             const startX = e.pageX // - $dialogElement[0].offsetLeft;
             const startY = e.pageY // - $dialogElement[0].offsetTop;
 
@@ -451,7 +452,7 @@ function LookUpManager(categoria, element, options, catego) {
             function mouseUpHandler() {
                 document.removeEventListener('mousemove', mouseMoveHandler);
                 document.removeEventListener('mouseup', mouseUpHandler);
-                $('.lookup-dialog_title').css('cursor', 'grab');
+                $('.' + settings.dialogTitleClass).css('cursor', 'grab');
             }
 
             document.addEventListener('mousemove', mouseMoveHandler);
@@ -467,7 +468,7 @@ function LookUpManager(categoria, element, options, catego) {
             .off('click', '.lookup-dialog_add')
             .off('click', '.lookup-sort_alpha')
             .off('keypress', '.lookup-new_catego')
-            .off('mousedown', '.lookup-dialog_title')
+            .off('mousedown', '.' + settings.dialogTitleClass)
             .remove();
     }
     function fetchData() {
