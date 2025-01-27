@@ -166,7 +166,6 @@ function LookUpManager(categoria, element, options, catego) {
         if(!settings.reorder)
             return;
         const newOrder = [];
-        console.log("SORTABLETOARRAY", sortable.toArray());
         for(c of sortable.toArray())
             newOrder.push(getValueById(c));
         catego.values = newOrder;
@@ -218,7 +217,7 @@ function LookUpManager(categoria, element, options, catego) {
                 success: function(response) {
                     if (response.success) {
                         $row.remove();
-                        $(`#taka option[value="${currentValue.id}"]`).remove();
+                        // $(`#taka option[value="${currentValue.id}"]`).remove();
                         update_others();
                     } else {
                         showErrorDialog(response.error || 'Error al eliminar');
@@ -280,12 +279,15 @@ function LookUpManager(categoria, element, options, catego) {
                     if (response.success) {
                         var $newCell = $(`<td data-categomode="read" ${newValue.activo === 'Inactivo' ? 'class="lookup-inactivo"' : ''}>${newValue.label}</td>`);
                         $editCell.replaceWith($newCell);
+                        /*
                         const $option = $(`#taka option[value="${currentValue.id}"]`);
                         if(newValue.activo === 'Inactivo') {
                             $option.remove();
                         } else {
                             $option.text(newValue.label);
                         }
+
+                         */
                         update_others();
                     } else {
                         showErrorDialog(response.error || 'Error updating category');
@@ -364,10 +366,7 @@ function LookUpManager(categoria, element, options, catego) {
                     var $newRow = _createTableRow(newValue);
                     $dialog.find('.lookup-sortable').append($newRow);
                     $input.val('');
-                    $('#taka').append($('<option>', {
-                        value: response.id,
-                        text: newName
-                    }));
+                    // $('#taka').append($('<option>', {value: response.id, text: newName}));
                     update_others();
                 } else {
                     showErrorDialog(response.error || 'Error al agregar, intente mas tarde');
