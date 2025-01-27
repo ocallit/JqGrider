@@ -1,39 +1,39 @@
 <?php
-// colmo-generator.php
+// colmo-generator.php v 1.0.1
 require_once __DIR__ . '/vendor/autoload.php';
 
+use Ocallit\Sqler\DatabaseMetadata;
 use Ocallit\Sqler\SqlExecutor;
-use Ocallit\Sqler\ColModelBuilder;
+use Ocallit\JqGrider\JqGrider\ColModelBuilder;
 
 $error = '';
 $result = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $config = [
           'hostname' => 'localhost',
           'username' => $_POST['userName'] ?? '',
           'password' => $_POST['password'] ?? '',
           'database' => $_POST['databaseName'] ?? '',
-          'port' => null,
-          'socket' => null,
-          'flags' => 0
+          'port' => NULL,
+          'socket' => NULL,
+          'flags' => 0,
         ];
 
         $sqlExecutor = new SqlExecutor($config);
+        DatabaseMetadata::initialize($sqlExecutor);
         $builder = new ColModelBuilder($sqlExecutor);
         $query = $_POST['query'] ?? '';
-
-        if (!empty($query)) {
+        if(!empty($query)) {
             $colModel = $builder->buildFromQuery($query);
-            $result = $builder->toJson();
+            $result = $builder->toJson($colModel);
         }
-    } catch (Exception $e) {
+    } catch(Exception $e) {
         $error = $e->getMessage();
     }
 }
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -48,21 +48,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 0 20px;
             background-color: #f0f2f5;
         }
+
         .container {
             background-color: white;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
             color: #333;
         }
+
         input[type="text"],
         input[type="password"],
         textarea {
@@ -73,11 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             box-sizing: border-box;
             font-size: 14px;
         }
+
         textarea {
             height: 150px;
             font-family: monospace;
             resize: vertical;
         }
+
         button {
             background-color: #4CAF50;
             color: white;
@@ -87,13 +93,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             cursor: pointer;
             font-size: 14px;
         }
+
         button:hover {
             background-color: #45a049;
         }
+
         .result {
             margin-top: 20px;
             position: relative;
         }
+
         .result pre {
             background-color: #f8f9fa;
             padding: 15px;
@@ -105,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 14px;
             line-height: 1.5;
         }
+
         .copy-btn {
             position: absolute;
             top: 10px;
@@ -113,9 +123,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 12px;
             padding: 5px 10px;
         }
+
         .copy-btn:hover {
             background-color: #0056b3;
         }
+
         .error {
             color: #721c24;
             background-color: #f8d7da;
@@ -124,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             padding: 10px;
             border-radius: 4px;
         }
+
         h1 {
             color: #333;
             margin-bottom: 20px;
@@ -131,9 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+
 <div class="container">
     <h1>ColModel Generator</h1>
-
     <form method="post" id="colmoForm">
         <div class="form-group">
             <label for="databaseName">Database Name:</label>
@@ -159,13 +172,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Generate ColModel</button>
     </form>
 
-    <?php if ($error): ?>
+    <?php if($error): ?>
         <div class="error">
             <?= htmlspecialchars($error) ?>
         </div>
     <?php endif; ?>
 
-    <?php if ($result): ?>
+    <?php if($result): ?>
         <div class="result">
             <button class="copy-btn" onclick="copyResult()">Copy</button>
             <pre id="result"><?= htmlspecialchars($result) ?></pre>
@@ -174,18 +187,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-    // Load saved values from localStorage
     document.addEventListener('DOMContentLoaded', function() {
         const fields = ['databaseName', 'userName', 'password'];
         fields.forEach(field => {
             const savedValue = localStorage.getItem(field);
-            if (savedValue) {
+            if(savedValue) {
                 document.getElementById(field).value = savedValue;
             }
         });
     });
 
-    // Save values to localStorage on form submit
     document.getElementById('colmoForm').addEventListener('submit', function() {
         const fields = ['databaseName', 'userName', 'password'];
         fields.forEach(field => {
@@ -194,7 +205,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         });
     });
 
-    // Copy result to clipboard
     function copyResult() {
         const result = document.getElementById('result');
         const range = document.createRange();

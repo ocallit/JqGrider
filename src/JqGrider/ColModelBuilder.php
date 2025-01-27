@@ -9,7 +9,8 @@ use Ocallit\Sqler\SqlExecutor;
 use Ocallit\Sqler\SqlUtils;
 
 
-class ColModelBuilder implements JsonSerializable {
+class ColModelBuilder {
+    protected $version = '1.0.0';
     protected SqlExecutor $sqlExecutor;
     protected array $colModel = [];
     protected DatabaseMetadata $metadata;
@@ -28,42 +29,42 @@ class ColModelBuilder implements JsonSerializable {
      * @throws Exception
      */
     public function buildFromQuery(string $query): array {
+        $colModel = [];
         $metadata = $this->metadata->query($query);
-
-        foreach ($metadata as $field) {
+        foreach($metadata as $field) {
             $column = [
               'name' => $field['name'],
-              'index' => $field['index']
+              'index' => $field['index'],
             ];
 
-            if ($field['flags'] & MYSQLI_PRI_KEY_FLAG) {
-                $column['key'] = true;
+            if($field['flags'] & MYSQLI_PRI_KEY_FLAG) {
+                $column['key'] = TRUE;
             }
 
-            if ($field['flags'] & MYSQLI_PRI_KEY_FLAG ||
+            if($field['flags'] & MYSQLI_PRI_KEY_FLAG ||
               preg_match('/_id$/', $field['name'])) {
-                $column['hidden'] = true;
+                $column['hidden'] = TRUE;
             }
 
-            if (!empty($field['orgtable'])) {
+            if(!empty($field['orgtable'])) {
                 $fkConfig = $this->handleForeignKey($field['orgtable'], $field['orgname']);
-                if ($fkConfig) {
-                    $column['template'] = $fkConfig;
-                    $this->colModel[] = $column;
+                if($fkConfig) {
+                    $column['__colmoAddSelect__'] = $fkConfig;
+                    $colModel[] = $column;
                     continue;
                 }
             }
 
 
             $template = $this->getTemplateForField($field);
-            if ($template) {
-                $column['template'] = $template;
+            if($template) {
+                $column['__getTemplate__'] = $template;
             }
 
-            $this->colModel[] = $column;
+            $colModel[] = $column;
         }
 
-        return $this->colModel;
+        return $colModel;
     }
 
     /**
@@ -75,8 +76,7 @@ class ColModelBuilder implements JsonSerializable {
      * @throws Exception
      */
     protected function handleForeignKey(string $tableName, string $columnName): ?string {
-        // Get foreign key information from information schema
-        $sql = "SELECT /" . __METHOD__ . "/ 
+        $sql = "SELECT /*" . __METHOD__ . "*/ 
                 kcu.REFERENCED_TABLE_NAME,
                 kcu.REFERENCED_COLUMN_NAME
             FROM information_schema.KEY_COLUMN_USAGE kcu
@@ -86,15 +86,15 @@ class ColModelBuilder implements JsonSerializable {
                 AND kcu.REFERENCED_TABLE_NAME IS NOT NULL";
 
         $fk = $this->sqlExecutor->row($sql, [$tableName, $columnName]);
-        if (empty($fk)) {
-            return null;
+        if(empty($fk)) {
+            return NULL;
         }
 
         // Get the first non-PK column from referenced table for labels
         $referencedTable = $fk['REFERENCED_TABLE_NAME'];
         $referencedColumn = $fk['REFERENCED_COLUMN_NAME'];
 
-        $labelColumnSql = "SELECT /" . __METHOD__ . "/ COLUMN_NAME 
+        $labelColumnSql = "SELECT /*" . __METHOD__ . "*/ COLUMN_NAME 
             FROM information_schema.COLUMNS 
             WHERE TABLE_SCHEMA = DATABASE()
                 AND TABLE_NAME = ?
@@ -103,11 +103,10 @@ class ColModelBuilder implements JsonSerializable {
             LIMIT 1";
 
         $labelColumn = $this->sqlExecutor->firstValue($labelColumnSql, [$referencedTable, $referencedColumn]);
-        if (!$labelColumn) {
-            return null;
+        if(!$labelColumn) {
+            return NULL;
         }
 
-        // Build the dynamic select query with proper field escaping
         $referencedTableEsc = SqlUtils::fieldIt($referencedTable);
         $referencedColumnEsc = SqlUtils::fieldIt($referencedColumn);
         $labelColumnEsc = SqlUtils::fieldIt($labelColumn);
@@ -122,71 +121,43 @@ class ColModelBuilder implements JsonSerializable {
     }
 
 
-
     /**
      * Creates the template string for a field based on its MySQL type
      */
     protected function getTemplateForField(array $field): ?string {
+
         $type = $field['Type'];
-
-        if ($field['flags'] & MYSQLI_UNSIGNED_FLAG) {
-            $baseType = preg_replace('/\s*unsigned/', '', $type);
-            return "getTemplate('{$baseType} unsigned')";
-        }
-
-        if (preg_match('/^enum\((.*)\)$/i', $type, $matches)) {
+        if(str_contains($type, "unsigned" ))
+            return "getTemplate('$type')";
+        if(str_starts_with($type, "enum"))
             return "getTemplate(\"$type\")";
-        }
-
-        if (preg_match('/^set\((.*)\)$/i', $type, $matches)) {
+        if(str_starts_with($type, "set"))
             return "getTemplate(\"$type\")";
-        }
-
-        if (preg_match('/^decimal\((\d+),(\d+)\)$/i', $type, $matches)) {
-            return "getTemplate('decimal({$matches[1]},{$matches[2]})')";
-        }
-
-        if (preg_match('/^(var)?char\((\d+)\)$/i', $type, $matches)) {
+        if(str_starts_with($type, "set"))
             return "getTemplate(\"$type\")";
-        }
+        if(str_starts_with($type, "decimal"))
+            return "getTemplate(\"$type\")";
+        if(str_contains($type, "char"))
+            return "getTemplate(\"$type\")";
 
         $basicTypes = [
           'tinyint', 'smallint', 'mediumint', 'int', 'bigint',
-          'date', 'datetime', 'timestamp'
+          'date', 'datetime', 'timestamp',
         ];
-
-        if (in_array(strtolower($type), $basicTypes)) {
+        if(in_array(strtolower($type), $basicTypes)) {
             return "getTemplate('$type')";
         }
 
-        return null;
+        return NULL;
     }
 
-    /**
-     * Custom JSON serialization to handle template strings
-     */
-    public function jsonSerialize(): array {
-        return array_map(function($col) {
-            if (isset($col['template'])) {
-                // Store template string to be processed later
-                $col['__template__'] = $col['template'];
-                unset($col['template']);
-            }
-            return $col;
-        }, $this->colModel);
-    }
+    public function toJson($colModel): string {
+        $json = json_encode($colModel, JSON_PRETTY_PRINT);
+        $pattern = '/"__colmoAddSelect__":\s*"colmoAddSelect\((.*?)\)/';
+        $replacement = '...colmoAddSelect($1)';
+        $json = preg_replace($pattern, $replacement, $json);
 
-    /**
-     * Gets JSON string with proper template formatting
-     */
-    public function toJson(): string {
-        $json = json_encode($this, JSON_PRETTY_PRINT);
-
-        // Replace the template placeholder with actual JavaScript
-        return preg_replace(
-          '/"__template__":\s*"(getTemplate\([^)]+\))"/m',
-          '...\\1',
-          $json
-        );
+        $pattern = '/"__getTemplate__":\s*"getTemplate(\(.*\))"/';
+        return preg_replace($pattern, '...getTemplate$1', $json);
     }
 }
