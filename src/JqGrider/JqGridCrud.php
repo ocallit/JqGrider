@@ -5,6 +5,7 @@ namespace Ocallit\JqGrider\JqGrider;
 use Ocallit\Sqler\SqlExecutor;
 use Ocallit\Sqler\DatabaseMetadata;
 use Ocallit\Sqler\QueryBuilder;
+use Ocallit\Sqler\SqlUtils;
 
 use Exception;
 use function array_diff_key;
@@ -17,6 +18,7 @@ use function preg_replace;
 use function rtrim;
 
 class JqGridCrud {
+    protected string $version = '1.0.0';
     protected SqlExecutor $sql;
     protected string $tableName;
     protected DatabaseMetadata $metadata;
@@ -38,6 +40,7 @@ class JqGridCrud {
         $this->metadata = DatabaseMetadata::getInstance();
         $this->queryBuilder = new QueryBuilder();
         $this->primaryKeys = $this->metadata->primaryKeys()[$tableName] ?? [];
+
         $this->uploadPath = $uploadPath ? rtrim($uploadPath, '/') . '/' : null;
         $this->prohibitedInsertColumns = $prohibitedInsertColumns;
         $this->prohibitedUpdateColumns = $prohibitedUpdateColumns;
@@ -72,6 +75,8 @@ class JqGridCrud {
         } catch(Exception $e) {
             $response['success'] = false;
             $response['message'] = $e->getMessage();
+            header("HTTP/1.1 500 Datos Invalidos");
+            exit;
         }
         return $response;
     }
@@ -96,12 +101,12 @@ class JqGridCrud {
 
             if($fileInfo['error'] !== UPLOAD_ERR_OK) {
                 $errorMessages = [
-                    UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize',
-                    UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE',
-                    UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
-                    UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
-                    UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
-                    UPLOAD_ERR_EXTENSION => 'File upload stopped by extension',
+                  UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize',
+                  UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE',
+                  UPLOAD_ERR_PARTIAL => 'File was only partially uploaded',
+                  UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder',
+                  UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
+                  UPLOAD_ERR_EXTENSION => 'File upload stopped by extension',
                 ];
                 throw new Exception($errorMessages[$fileInfo['error']] ?? 'Unknown upload error');
             }
@@ -141,15 +146,15 @@ class JqGridCrud {
     protected function sanitizeFilename(string $filename): string {
         // Remove any directory components
         $filename = basename($filename);
-        
+
         // Remove any non-alphanumeric characters except dots, dashes, and underscores
         $filename = preg_replace('/[^A-Za-z0-9._-]/', '', $filename);
-        
+
         // Ensure the filename isn't empty after sanitization
         if(empty($filename)) {
             throw new Exception('Invalid filename');
         }
-        
+
         return $filename;
     }
 
@@ -158,16 +163,16 @@ class JqGridCrud {
      * @throws Exception
      */
     protected function add(array $data): array {
-        // Remove jqGrid specific fields
+
         unset($data['oper'], $data['id']);
         $data = array_diff_key($data, array_flip($this->prohibitedInsertColumns));
         $query = $this->queryBuilder->insert($this->tableName, $data);
         $this->sql->query($query['query'], $query['parameters']);
-        
+
         return [
-            'success' => true,
-            'message' => 'Record added successfully',
-            'id' => $this->sql->last_insert_id()
+          'success' => true,
+          'message' => 'Record added successfully',
+          'id' => $this->sql->last_insert_id()
         ];
     }
 
@@ -180,12 +185,13 @@ class JqGridCrud {
             throw new Exception("No primary key defined for table {$this->tableName}");
         }
 
-        // Build where clause from primary keys
         $where = [];
         foreach($this->primaryKeys as $key) {
             if(!isset($data[$key])) {
                 throw new Exception("Primary key $key not provided");
             }
+            if($key !== 'id')
+                unset($data['id']);
             $where[$key] = $data[$key];
         }
 
@@ -195,11 +201,12 @@ class JqGridCrud {
         }
         $data = array_diff_key($data, array_flip($this->prohibitedUpdateColumns));
         $query = $this->queryBuilder->update($this->tableName, $data, $where);
+
         $this->sql->query($query['query'], $query['parameters']);
 
         return [
-            'success' => true,
-            'message' => 'Record updated successfully'
+          'success' => true,
+          'message' => 'Datos Guardados!'
         ];
     }
 
@@ -211,26 +218,21 @@ class JqGridCrud {
         if(empty($this->primaryKeys)) {
             throw new Exception("No primary key defined for table {$this->tableName}");
         }
+        $primaryKey = array_key_first($this->primaryKeys);
 
-        // Handle multiple IDs for batch delete
-        $ids = isset($data['id']) ? explode(',', $data['id']) : [];
-        if(empty($ids)) {
-            throw new Exception("No IDs provided for deletion");
+        if(empty($data['id'] ?? NULL)) {
+            throw new Exception("Falto el ID");
         }
 
-        // Build where clause
-        $where = [];
-        $primaryKey = array_key_first($this->primaryKeys);
-        $where[$primaryKey] = $ids;
+        $query = "DELETE FROM " . SqlUtils::fieldIt($this->tableName) . " WHERE " . SqlUtils::fieldIt($primaryKey) . "=?";
 
-        $whereClause = $this->queryBuilder->where($where);
-        $query = "DELETE FROM " . SqlUtils::fieldIt($this->tableName) . " WHERE " . $whereClause['query'];
-        
-        $this->sql->query($query, $whereClause['parameters']);
+        $where = [$data["id"]];
+        $this->sql->query($query, $where);
 
         return [
-            'success' => true,
-            'message' => count($ids) . ' record(s) deleted successfully'
+
+          'success' => true,
+          'message' =>  ' record(s) deleted successfully'
         ];
     }
 }

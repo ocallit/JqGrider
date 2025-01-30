@@ -21,7 +21,7 @@ use function trim;
 use function ucfirst;
 
 class JqGridReader {
-
+    protected string $version = '1.0.0';
     protected SqlExecutor $sqlExecutor;
     protected array $parameters;
 

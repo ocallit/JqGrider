@@ -15,7 +15,7 @@ namespace Ocallit\JqGrider\JqGrider;
  * @package ia\JqGrid
  */
 class Filter2Where {
-
+    protected string $version = '1.0.0';
     /**
      * @var array $opToStandard Translate from gird operators to jqGrid standard operators, serves as valid operator list
      */
