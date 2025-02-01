@@ -1,32 +1,65 @@
-.sortable-ghost {
-    opacity: .5;
-    background: #C8EBFB;
-}
-.sortable-chosen {
-    opacity: 0.5;
-    border: 2px dashed #000;
-}
-.sortable-drag {
-    position: absolute;
-    pointer-events: none;
-    z-index: 9999;
-}
-.sortable-fallback {
-    background-color: #eee;
-    border: 2px dashed #000;
-}
+
+
+
+
 .lookup-sort_handle {
+    touch-action: none;
+    -ms-touch-action: none;
+    user-select: none;
     cursor: move;
     padding: 5px;
     border-radius: 2px;
 }
+.lookup-sortable-handle {
+    touch-action: none;
+    -ms-touch-action: none;
+
+    user-select: none;
+    -webkit-user-drag:none;
+    cursor: move;
+    padding: 5px;
+    border-radius: 2px;
+}
+
+
+
+.lookup-sortable-chosen {
+    opacity: 0.5;
+    border: 2px dashed darkblue;
+    box-shadow: 4px 3px 0 0 rgba(0, 0, 139, 0.6);
+}
+
+.lookup-sortable-drag {
+    opacity: 0.1;
+    position: absolute;
+    pointer-events: none;
+    z-index: 9999;
+    background-color: white;
+    border: 4px darkblue dashed;
+    box-shadow: 4px 4px 0 0 rgba(0, 0, 139, 0.4);
+}
+.lookup-sortable-ghost {
+    opacity: 0.5;
+    background: #C8EBFB;
+    color:darkblue;
+    border: 3px darkblue solid!important;
+}
+.lookup-sortable-fallback {
+    opacity: 0;
+    display: none;
+    background-color: #eee;
+    border: 2px dashed #000;
+}
+
 .lookup-pointer {cursor: pointer;}
 .lookup-acota {font-size:10px;color:gray;text-align:center;font-style:italic;font-family:Courier New, Courier, monospace;line-height:0.9em;padding:0;margin:0.3em 0 0 0}
 .lookup-rojo {color:red}
 .lookup-inactivo {color: red; text-decoration: line-through;}
 .lookup-manage {cursor:pointer;}
 .lookup-dialog {
-    border:7px groove maroon;border-image: linear-gradient(to right,  #ed2756, blue, darkblue, maroon) 1;padding:0;max-height:80vh;overflow:auto;
+    border:7px groove maroon;border-image: linear-gradient(to right,  #ed2756, blue, darkblue, maroon) 1;padding:0;
+    width:90vw;overflow:auto;
+    height:85vh;max-height:960px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
 .lookup-dialog::backdrop {background-color: rgba(245, 245, 245, 0.2);}
@@ -34,6 +67,8 @@
     background-color:maroon;background: linear-gradient(to right,  #ed2756, blue, darkblue, maroon); font-weight:bold;margin:0;padding:5px;
     display:flex;justify-content:space-between;align-items:center;
 }
+.lookup-elevation-2 {box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.3), 0 1px 8px 0 rgb(0 0 0 / 0.15);}
+.lookup-elevation-4 {box-shadow: 0 6px 10px 4px rgb(0 0 0 / 0.15), 0 2px 3px 0 rgb(0 0 0 / 0.3);}
 .lookup-dialog_title_frase {font-size:1.4em;font-weight:bold;color:white}
 .lookup-dialog_content {margin:0.3em;padding:0.3em}
 .lookup-dialog_new_catego {border-bottom:1px solid maroon;padding:0.3em;margin:0.3em}

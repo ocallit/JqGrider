@@ -10,6 +10,7 @@ function LookUpManager(categoria, element, options, catego) {
         add: true,
         edit:true,
         delete: true,
+        maxlength: 32,
         dialogClass: 'lookup-dialog',
         dialogTitleClass: 'lookup-dialog_title',
         select: null,
@@ -35,7 +36,7 @@ function LookUpManager(categoria, element, options, catego) {
 
     function getValueById(id) {
         for(var c of catego.values)
-            if(c.id === id)
+            if(c.hasOwnProperty("id") && c.id === id)
                 return c;
         return null;
     }
@@ -43,7 +44,7 @@ function LookUpManager(categoria, element, options, catego) {
     function _strim(s) { return s === null ? '' : s.replace(/\s(\s+)/gm, ' ').trim(); }
     function _yaExiste(label, id) {
         for(var c of catego.values)
-            if(c.label === label && (c.id !== id || id === null))
+            if(c.hasOwnProperty("label") && c.hasOwnProperty("id") && c.label === label && (c.id !== id || id === null))
                 return true;
         return false;
     }
@@ -74,7 +75,7 @@ function LookUpManager(categoria, element, options, catego) {
 
         return $(`
             <td data-categomode="edit">
-                <input type="text" maxlength="32" style="width:20em" class="lookup-edit_input" required value="${value.label}">
+                <input type="text" maxlength="${settings.maxlength}" style="width:20em" class="lookup-edit_input" required value="${value.label}">
                 <select class="lookup-select">
                     <option ${value.activo === 'Activo' ? 'selected' : ''}>Activo</option>
                     <option ${value.activo === 'Inactivo' ? 'selected' : ''} class="lookup-rojo">Inactivo</option>
@@ -99,7 +100,9 @@ function LookUpManager(categoria, element, options, catego) {
     function _createDialog() {
         let addDiv =  settings.add ?
             ` <div class="lookup-dialog_new_catego">
-                <input type="text" maxlength="32" class="lookup-new_catego" style="width:20em"  required placeholder="${catego.label}">
+                <input type="text" maxlength="${settings.maxlength}" class="lookup-new_catego" style="width:20em"  required placeholder="Buscar o agregar ${catego.label}">
+                <span class="lookup-clear-search" style="color:#999;cursor:pointer;">&times;</span>
+                &nbsp;
                 <button type="button" class="lookup-dialog_add"><i class="fa-solid fa-circle-plus fa-lg" style="color: #008800;"></i><span class="lookup-acota">Agregar</span></button>
               </div>
                 ` :
@@ -133,9 +136,20 @@ function LookUpManager(categoria, element, options, catego) {
             handle: '.lookup-sortable-handle',
             animation: 150,
             dataIdAttr: 'data-categoid',
-            onEnd: function() {
-                _saveOrder();
-            }
+            delayOnTouchOnly: true, // Prevents drag freeze on touch devices
+            touchStartThreshold: 3, // Lower threshold for better touch response
+            fallbackTolerance: 3,   // Helps with touch accuracy
+            forceFallback: true,    // Mac, IOS
+
+            scroll: true,
+            scrollSensitivity: 50,
+            scrollSpeed: 10,
+
+            ghostClass: 'lookup-sortable-ghost',
+            chosenClass: 'lookup-sortable-chosen',
+            dragClass: 'lookup-sortable-drag',
+            fallbackClass: 'lookup-sortable-fallback',
+            onEnd: function() {_saveOrder();}
         });
     }
 
@@ -365,7 +379,7 @@ function LookUpManager(categoria, element, options, catego) {
                     catego.values.push(newValue);
                     var $newRow = _createTableRow(newValue);
                     $dialog.find('.lookup-sortable').append($newRow);
-                    $input.val('');
+                    $input.val('').trigger('input');
                     // $('#taka').append($('<option>', {value: response.id, text: newName}));
                     update_others();
                 } else {
@@ -418,7 +432,7 @@ function LookUpManager(categoria, element, options, catego) {
         $('body').append($dialog);
         _initializeSortable($dialog.find('.lookup-sortable'));
 
-         $dialog.on('click', '.lookup-dialog_close', function() {
+        $dialog.on('click', '.lookup-dialog_close', function() {
              $dialog.off('click', '.lookup-dialog_close')
                  .off('click', '.lookup-ButtonDelete')
                  .off('click', '.lookup-ButtonEdit')
@@ -457,6 +471,37 @@ function LookUpManager(categoria, element, options, catego) {
             document.addEventListener('mousemove', mouseMoveHandler);
             document.addEventListener('mouseup', mouseUpHandler);
         });
+        $dialog.on('click', '.lookup-clear-search', function() {
+            const $input = $(this).siblings('.lookup-new_catego');
+            $input.val('').trigger('input').focus();
+        });
+        $dialog.on('input', '.lookup-new_catego', function(ev) {
+
+            const searchTerm = _strim($(ev.target).val()).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+            if(searchTerm.length === 0) {
+                $('.lookup-sortable tr').show();
+                return;
+            }
+
+            console.log('input AQUI', searchTerm);
+            $('TBODY.lookup-sortable tr', $dialog).each(function() {
+                let cellText;
+                const $row = $(this);
+                const $cell = $row.find('[data-categomode="read"]');
+                if ($cell.length) {
+                    cellText = $cell.text();
+                } else {
+                    cellText = $row.find('.lookup-edit_input').val();
+                }
+                cellText = _strim(cellText).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                if (cellText.includes(searchTerm)) {
+                    $row.show();
+                } else {
+                    $row.hide();
+                }
+            });
+        });
         $dialog[0].showModal();
     }
 
@@ -468,8 +513,11 @@ function LookUpManager(categoria, element, options, catego) {
             .off('click', '.lookup-sort_alpha')
             .off('keypress', '.lookup-new_catego')
             .off('mousedown', '.' + settings.dialogTitleClass)
+            .off('input', '.lookup-new_catego')
+            .off('click', '.lookup-clear-search')
             .remove();
     }
+
     function fetchData() {
         $.ajax({
             url: settings.url,
@@ -490,7 +538,8 @@ function LookUpManager(categoria, element, options, catego) {
     }
 
     function showErrorDialog(message) {
-        var $dialog = $('<dialog class="lookup-dialog"><div class="lookup-dialog_title">Error</div><div class="lookup-dialog_content">' + message + '</div></dialog>');
+        var $dialog = $('<dialog class="lookup-dialog lookup-elevation-4" style="width:fit-content;padding: 0;height:fit-content;color: red;background-color: white">' +
+            '<div class="lookup-elevation-2" style="padding:0 0 1em 0;margin:0;background-color:crimson;color: white" >&nbsp;Ya Existe!&nbsp;&nbsp;&nbsp;<button type="button" style="cursor:pointer;background-color:silver;color:black;vertical-align:middle ">&otimes;</button>&nbsp;</div><div class="lookup-dialog_content">' + message + '</div></dialog>');
         $('body').append($dialog);
         $dialog[0].showModal();
         $dialog.on('click', function () {

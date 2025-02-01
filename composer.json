@@ -8,6 +8,13 @@
     "ocallit/sqler": "*",
     "ext-mysqli": "*"
   },
+  "preferred-install": {
+    "ocallit/sqler": "source"
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
   "autoload": {
     "psr-4": {
       "Ocallit\\JqGrider\\": "src/"
