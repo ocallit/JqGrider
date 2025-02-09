@@ -14,7 +14,6 @@ use Ocallit\Sqler\SqlUtils;
 class LookupManager
 {
     use EventEmitter;
-
     const EVENT_MODIFIED = 'lookup_modified';
 
     protected SqlExecutor $sqlExecutor;
@@ -157,7 +156,7 @@ class LookupManager
         $query = "INSERT /*$method*/ INTO $tableName(label, activo) VALUES (?, 'Activo')";
         $this->sqlExecutor->query($query, [$label]);
         $id = $this->sqlExecutor->last_insert_id();
-        $this->notify(self::EVENT_MODIFIED, $id, $label);
+        $this->notify(self::EVENT_MODIFIED, "insert",  $this->tableName, $id, $label);
         $this->history('insert', $label, $id);
         return ['success' => TRUE, 'id' => $id];
     }
@@ -184,7 +183,7 @@ class LookupManager
         $tableName = SqlUtils::fieldIt($this->tableName);
         $query = "UPDATE /*$method*/ $tableName SET label = ?, activo = ? WHERE id = ?";
         $this->sqlExecutor->query($query, [$label, $activo, $id]);
-        $this->notify(self::EVENT_MODIFIED, $id, $label);
+        $this->notify(self::EVENT_MODIFIED, "update", $this->tableName, $id, $label);
         $this->history('update', $label, $id);
         return ['success' => TRUE];
     }
@@ -208,7 +207,7 @@ class LookupManager
         $tableName = SqlUtils::fieldIt($this->tableName);
         $query = "DELETE /*$method*/ FROM $tableName WHERE id = ?";
         $this->sqlExecutor->query($query, [$id]);
-        $this->notify(self::EVENT_MODIFIED, $id);
+        $this->notify(self::EVENT_MODIFIED, "delete", $this->tableName, $id);
         $this->history('delete', "", $id);
         return ['success' => TRUE];
     }
@@ -234,7 +233,7 @@ class LookupManager
             $query = "UPDATE /*$method*/ $tableName SET orden = ? WHERE id = ?";
             $this->sqlExecutor->query($query, [$index + 1, $id]);
         }
-        $this->notify(self::EVENT_MODIFIED);
+        $this->notify(self::EVENT_MODIFIED, $this->tableName);
         $this->history('reorder', "");
         return ['success' => TRUE];
     }
