@@ -1,14 +1,22 @@
 <?php
 /** @noinspection PhpUnused */
+
 /** @noinspection SqlNoDataSourceInspection */
 
 namespace Ocallit\JqGrider\Lookuper;
 
 use Exception;
+use Ocallit\JqGrider\EventEmitter;
+use Ocallit\Sqler\Historian;
 use Ocallit\Sqler\SqlExecutor;
 use Ocallit\Sqler\SqlUtils;
 
-class LookupManager {
+class LookupManager
+{
+    use EventEmitter;
+
+    const EVENT_MODIFIED = 'lookup_modified';
+
     protected SqlExecutor $sqlExecutor;
     protected string $tableName;
     protected array $lookup_registry = [];
@@ -18,7 +26,7 @@ class LookupManager {
     protected bool $canDelete;
     protected bool $canReorder;
 
-    public function __construct(SqlExecutor $sqlExecutor, $tableName = '', bool $canList = true, bool $canAdd = true, bool $canEdit = true, bool $canDelete = true, bool $canReorder = true) {
+    public function __construct(SqlExecutor $sqlExecutor, $tableName = '', bool $canList = TRUE, bool $canAdd = TRUE, bool $canEdit = TRUE, bool $canDelete = TRUE, bool $canReorder = TRUE) {
         $this->sqlExecutor = $sqlExecutor;
         $this->tableName = $tableName;
         $this->canList = $canList;
@@ -27,6 +35,7 @@ class LookupManager {
         $this->canDelete = $canDelete;
         $this->canReorder = $canReorder;
     }
+
 
     /**
      * Handles the AJAX request based on the action.
@@ -50,33 +59,43 @@ class LookupManager {
             $errorNo = '(' . $this->sqlExecutor->getLastErrorNumber() . ')';
             return ['success' => FALSE, 'error' => "Problemas en la base de datos para determinar el catálogo, intente mas tarde $errorNo",
               'error_no' => $this->sqlExecutor->getLastErrorNumber(),
-              'error_log' =>  $this->sqlExecutor->getErrorLog(),
-              'php_last_error' => error_get_last()
+              'error_log' => $this->sqlExecutor->getErrorLog(),
+              'php_last_error' => error_get_last(),
             ];
         }
 
-        $action = $request['accion'] ?? '';
+        $action = strtolower( $request['accion'] ?? '');
         try {
-            return match ($action) {
-                'add' => $this->addCategory($request),
-                'update' => $this->updateCategory($request),
-                'delete' => $this->deleteCategory($request),
-                'reorder' => $this->reorderCategories($request),
-                'list' => $this->list(),
-                default => ['success' => FALSE, 'error' => 'Solicitud no reconocida'],
-            };
+            switch($action) {
+                case 'add':
+                    $response = $this->addCategory($request);
+                    break;
+                case 'update':
+                    $response = $this->updateCategory($request);
+                    break;
+                case 'delete':
+                    $response = $this->deleteCategory($request);
+                    break;
+                case 'reorder':
+                    $response = $this->reorderCategories($request);
+                    break;
+                case 'list':
+                default:
+                    $response = $this->list();
+            }
+            return $response;
         } catch(Exception) {
             $errorNo = '(' . $this->sqlExecutor->getLastErrorNumber() . ')';
-            if ($this->sqlExecutor->is_last_error_duplicate_key()) {
-                return ['success' => false, 'error' => 'Nombre duplicado, ya está registrado'];
-            } elseif ($this->sqlExecutor->is_last_error_invalid_foreign_key()) {
-                return ['success' => false,
+            if($this->sqlExecutor->is_last_error_duplicate_key()) {
+                return ['success' => FALSE, 'error' => 'Nombre duplicado, ya está registrado'];
+            } elseif($this->sqlExecutor->is_last_error_invalid_foreign_key()) {
+                return ['success' => FALSE,
                   'error' => 'Lo están usando, no se puede borrar. Márquelo como Inactivo y ya no se usará.'];
-            } elseif ($this->sqlExecutor->is_last_error_child_records_exist()) {
-                return ['success' => false,
+            } elseif($this->sqlExecutor->is_last_error_child_records_exist()) {
+                return ['success' => FALSE,
                   'error' => 'No se puede borrar porque tiene registros relacionados. Márquelo como Inactivo.'];
             } else {
-                return ['success' => false,
+                return ['success' => FALSE,
                   'error' => "Ocurrió un error inesperado. Por favor, inténtelo de nuevo más tarde. $errorNo"];
             }
         }
@@ -126,19 +145,20 @@ class LookupManager {
      * @throws Exception
      */
     protected function addCategory(array $request): array {
-        if (!$this->canAdd) {
+        if(!$this->canAdd) {
             return ['success' => FALSE, 'error' => 'Sin Permiso'];
         }
         $label = $request['label'] ?? '';
         if(empty($label)) {
-            return ['success' => FALSE, 'error' => 'Falto el nombr'];
+            return ['success' => FALSE, 'error' => 'Falto el nombre'];
         }
         $method = __METHOD__;
         $tableName = SqlUtils::fieldIt($this->tableName);
         $query = "INSERT /*$method*/ INTO $tableName(label, activo) VALUES (?, 'Activo')";
         $this->sqlExecutor->query($query, [$label]);
-
         $id = $this->sqlExecutor->last_insert_id();
+        $this->notify(self::EVENT_MODIFIED, $id, $label);
+        $this->history('insert', $label, $id);
         return ['success' => TRUE, 'id' => $id];
     }
 
@@ -150,7 +170,7 @@ class LookupManager {
      * @throws Exception
      */
     protected function updateCategory(array $request): array {
-        if (!$this->canEdit) {
+        if(!$this->canEdit) {
             return ['success' => FALSE, 'error' => 'Sin Permiso'];
         }
         $id = $request['id'] ?? 0;
@@ -164,7 +184,8 @@ class LookupManager {
         $tableName = SqlUtils::fieldIt($this->tableName);
         $query = "UPDATE /*$method*/ $tableName SET label = ?, activo = ? WHERE id = ?";
         $this->sqlExecutor->query($query, [$label, $activo, $id]);
-
+        $this->notify(self::EVENT_MODIFIED, $id, $label);
+        $this->history('update', $label, $id);
         return ['success' => TRUE];
     }
 
@@ -176,7 +197,7 @@ class LookupManager {
      * @throws Exception
      */
     protected function deleteCategory(array $request): array {
-        if (!$this->canDelete) {
+        if(!$this->canDelete) {
             return ['success' => FALSE, 'error' => 'Sin Permiso'];
         }
         $id = $request['id'] ?? 0;
@@ -187,7 +208,8 @@ class LookupManager {
         $tableName = SqlUtils::fieldIt($this->tableName);
         $query = "DELETE /*$method*/ FROM $tableName WHERE id = ?";
         $this->sqlExecutor->query($query, [$id]);
-
+        $this->notify(self::EVENT_MODIFIED, $id);
+        $this->history('delete', "", $id);
         return ['success' => TRUE];
     }
 
@@ -199,7 +221,7 @@ class LookupManager {
      * @throws Exception
      */
     protected function reorderCategories(array $request): array {
-        if (!$this->canReorder) {
+        if(!$this->canReorder) {
             return ['success' => FALSE, 'error' => 'Sin Permiso'];
         }
         $order = $request['order'] ?? [];
@@ -212,6 +234,8 @@ class LookupManager {
             $query = "UPDATE /*$method*/ $tableName SET orden = ? WHERE id = ?";
             $this->sqlExecutor->query($query, [$index + 1, $id]);
         }
+        $this->notify(self::EVENT_MODIFIED);
+        $this->history('reorder', "");
         return ['success' => TRUE];
     }
 
@@ -250,11 +274,23 @@ class LookupManager {
             'edit' => $this->canEdit,
             'delete' => $this->canDelete,
             'reorder' => $this->canReorder,
-          ]
+          ],
         ];
     }
 
-    protected function createTable():bool {
+    protected function history($action, $motive, $id ='LookUp'):void {
+        try {
+            $method = __METHOD__;
+            $history = new Historian($this->sqlExecutor, $this->tableName, ["id"]);
+            $history->register(
+              action: $action,
+              pk: [$id],
+              values: $this->sqlExecutor->array("SELECT /*$method*/ * FROM $this->tableName ORDER BY orden, label"),
+              motive: $motive,
+            );
+        } catch(Exception $e) {}
+    }
+    protected function createTable(): bool {
         try {
             $method = __METHOD__;
             $tableName = SqlUtils::fieldIt($this->tableName);
