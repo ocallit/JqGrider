@@ -130,15 +130,15 @@ class ColModelBuilder {
         if(str_contains($type, "unsigned" ))
             return "getTemplate('$type')";
         if(str_starts_with($type, "enum"))
-            return "getTemplate(\"$type\")";
+            return "getTemplate('$type')";
         if(str_starts_with($type, "set"))
-            return "getTemplate(\"$type\")";
+            return "getTemplate('$type')";
         if(str_starts_with($type, "set"))
-            return "getTemplate(\"$type\")";
+            return "getTemplate('$type')";
         if(str_starts_with($type, "decimal"))
-            return "getTemplate(\"$type\")";
+            return "getTemplate('$type')";
         if(str_contains($type, "char"))
-            return "getTemplate(\"$type\")";
+            return "getTemplate('$type')";
 
         $basicTypes = [
           'tinyint', 'smallint', 'mediumint', 'int', 'bigint',

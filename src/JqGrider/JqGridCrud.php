@@ -235,4 +235,91 @@ class JqGridCrud {
           'message' =>  ' record(s) deleted successfully'
         ];
     }
+
+
+    /**
+     * Uploads a file from a jqGrid file upload.
+     *
+     * @param string $savePath Directory path where the file will be saved.
+     * @param string $fileKey Key name in the $_FILES array.
+     * @param string $forceFileName If provided, this name will be used (without extension) instead of the uploaded filename.
+     * @param bool $consecutiveSuffix If true, a consecutive suffix is added when a file exists; if false, any existing file is replaced.
+     * @param bool $timestampCopy If true, a copy is also saved with a timestamp suffix (yyyy_mm_dd_H_i_s).
+     * @param array $validExtensions Array of valid file extensions (e.g., ['jpg', 'png', 'pdf']).
+     * @return string Full path (including filename and extension) where the file was saved.
+     * @throws Exception if the upload fails or if the file extension is invalid.
+     */
+    public function uploadFile(
+      string $savePath,
+      string $fileKey,
+      string $forceFileName = '',
+      bool   $consecutiveSuffix = TRUE,
+      bool   $timestampCopy = FALSE,
+      array  $validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'csv', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'],
+    ): string {
+        // Ensure the save path ends with a directory separator.
+        $savePath = rtrim($savePath, '/\\') . DIRECTORY_SEPARATOR;
+
+        // Check if the file was uploaded.
+        if(!isset($_FILES[$fileKey])) {
+            throw new Exception("No file uploaded with key '{$fileKey}'.");
+        }
+
+        $file = $_FILES[$fileKey];
+
+        // Check for upload errors.
+        if($file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception("File upload error: " . $file['error']);
+        }
+
+        // Retrieve original file information.
+        $originalName = $file['name'];
+        $fileInfo = pathinfo($originalName);
+        // Use forced file name if provided, otherwise use the uploaded file's base name.
+        $baseName = empty($forceFileName) ? $fileInfo['filename'] : $forceFileName;
+        $extension = isset($fileInfo['extension']) ? strtolower($fileInfo['extension']) : '';
+
+        // Validate file extension if a list of valid extensions is provided.
+        if(!empty($validExtensions)) {
+            $allowed = array_map('strtolower', $validExtensions);
+            if(!in_array($extension, $allowed)) {
+                throw new Exception("Invalid file extension '{$extension}'. Allowed extensions: " . implode(', ', $allowed));
+            }
+        }
+
+        // Construct the target file path.
+        $targetFile = $savePath . $baseName . '.' . $extension;
+
+        // If the file exists, either add a consecutive suffix or replace it.
+        if(file_exists($targetFile)) {
+            if($consecutiveSuffix) {
+                $counter = 1;
+                do {
+                    $targetFile = $savePath . $baseName . '_' . $counter . '.' . $extension;
+                    $counter++;
+                } while(file_exists($targetFile));
+            }
+            // If $consecutiveSuffix is false, the existing file will be replaced.
+        }
+
+        // Move the uploaded file to the target location.
+        if(!move_uploaded_file($file['tmp_name'], $targetFile)) {
+            throw new Exception("Failed to move the uploaded file.");
+        }
+
+        // If the timestamp flag is set, create a copy with the timestamp appended.
+        if($timestampCopy) {
+            $timestamp = date('Y_m_d_H_i_s');
+            $timestampFile = $savePath . $baseName . '_' . $timestamp . '.' . $extension;
+            if(!copy($targetFile, $timestampFile)) {
+                throw new Exception("Failed to create a timestamped copy of the uploaded file.");
+            }
+        }
+
+        // Return the full path where the file was saved.
+        return $targetFile;
+    }
+
+
+
 }
