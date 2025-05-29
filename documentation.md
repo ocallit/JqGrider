@@ -359,3 +359,138 @@ public function notify(string $event, ...$args): void
 *   **Parameters:**
     *   `event (string)`: Event name to trigger.
     *   `...args (mixed)`: Optional arguments for callbacks (e.g., operation type, table name, ID).
+
+# JavaScript Assets
+
+## File: `src/assets/JqGrider/colmo.js`
+
+### Global Objects
+
+#### `jqGridTemplates`
+*   **Definition/Structure:** A global JavaScript object literal: `var jqGridTemplates = { ... };` containing various properties, many of which are objects defining column model templates.
+*   **What it is:** A collection of predefined default column configurations for jqGrid.
+*   **What it's for:** To provide a starting set of jqGrid column options (like alignment, width, formatter, search options, edit rules) for common MySQL data types, simplifying grid setup. These are primarily used by the `getTemplate` function.
+
+##### Properties
+*   `darkColor (string)`: Intended as a default dark color for styling (e.g., `'#87b6d9'`).
+*   `lightColor (string)`: Intended as a default light color for styling (e.g., `'#ebf4fd'`).
+*   **Integer Type Templates (`tinyint`, `smallint`, `int`, `bigint`, and their `_unsigned` variants)** `(object)`:
+    *   Templates for integer-based MySQL types.
+    *   Define default jqGrid options for alignment, width, sorting (`integer`), formatting (`integer`), search, and editing (including min/max validation).
+    *   Example common structure for `tinyint`: `{ align: 'right', width: 40, sorttype: 'integer', formatter: 'integer', formatoptions: {thousandsSeparator: ',', defaultValue: '0'}, cellAttributes: function(...){...}, searchoptions: { sopt: [...] }, editrules:{integer:true, maxValue: ..., minValue: ...}}`
+*   **String Type Templates (`varchar`, `char`)** `(object)`:
+    *   Templates for text-based MySQL types.
+    *   Define defaults for alignment, text sorting, and string-based search options. The `getTemplate` function further customizes these by adding `editrules: {maxlength: N}` based on the type definition (e.g., `varchar(255)`).
+*   **Date/Time Type Templates (`date`, `datetime`)** `(object)`:
+    *   Templates for date/time MySQL types.
+    *   Provide date formatting, date sorting, and integrate with jQuery UI Datepicker/Datetimepicker for search and edit functionalities within the grid.
+*   **`enum_yesno` (as Enum Example)** `(object)`:
+    *   An example template for `ENUM` types, configured for select dropdowns in editing and searching. The `getTemplate` function dynamically populates select options based on the actual enum values from the MySQL type definition.
+*   **`decimal_10_2` (as Decimal Example)** `(object)`:
+    *   An example template for `DECIMAL` types.
+    *   Provides numeric formatting and validation. The `getTemplate` function dynamically adjusts precision, scale, min/max values for `editrules` and `formatoptions` based on the MySQL type definition.
+*   *(Other similar templates for various MySQL types like `set_colors`, `mediumint_unsigned` also exist within this object.)*
+
+#### `jqGUtil`
+*   **Definition/Structure:** An object literal: `var jqGUtil = { version: '...', method1: function() {}, ... };`
+*   **What it is:** A utility object providing helper functions for common jqGrid tasks.
+*   **What it's for:** To extend jqGrid functionality with features like dynamic select search options, CSV export, and custom footer calculations.
+
+##### Properties
+*   `version (string)`: Represents the version number of the `jqGUtil` object (e.g., `'1.0.0'`).
+
+##### Methods
+
+###### `addSearch`
+*   **Signature:** `addSearch: function (data, selectColumns)`
+*   **What it does:** Iterates through data to collect unique values from specified columns, seemingly to build select options.
+*   **What it's for:** Potentially for creating dynamic filter options based on the data present in the grid (current implementation in the provided code appears incomplete regarding its direct output/application).
+*   **What it returns:** `undefined` (implicitly).
+*   **What the return means:** No value is returned.
+*   **If it throws:** Does not explicitly throw.
+*   **Parameters:**
+    *   `data (Array)`: An array of objects representing the grid data.
+    *   `selectColumns (Array)`: An array of column names (strings) for which to find unique values.
+
+###### `addSelectSearch`
+*   **Signature:** `addSelectSearch: function(gridId, columnName, options)`
+*   **What it does:** Creates and configures a select (dropdown) filter in the jqGrid toolbar for a specified column, populating it with unique values from that column.
+*   **What it's for:** To provide users with a dropdown list of existing values for filtering a column, making it easier to find specific data.
+*   **What it returns:** `undefined` (implicitly).
+*   **What the return means:** No value is returned.
+*   **If it throws:** Does not explicitly throw.
+*   **Parameters:**
+    *   `gridId (string)`: The ID of the jqGrid HTML element (without '#').
+    *   `columnName (string)`: The name of the column in the `colModel` to add the select filter to.
+    *   `options (object)`: Optional configuration object (e.g., `allText` for the "All" option, `searchOptions`, `toolbarOptions`).
+
+###### `navButtonExportCsv`
+*   **Signature:** `navButtonExportCsv: function(gridId, pagerId)`
+*   **What it does:** Adds a button to the jqGrid pager to export currently visible grid data to a CSV file, for grids with local data (`datatype: 'local'` or `loadonce: true`).
+*   **What it's for:** To allow users to easily download the grid data in CSV format.
+*   **What it returns:** `undefined` (implicitly).
+*   **What the return means:** No value is returned.
+*   **If it throws:** Does not explicitly throw.
+*   **Parameters:**
+    *   `gridId (string)`: The ID of the jqGrid HTML element.
+    *   `pagerId (string)`: The ID of the jqGrid pager element (defaults to `gridId + "Pager"` if undefined).
+
+###### `footerMaxAvgMin`
+*   **Signature:** `footerMaxAvgMin: function(ev)`
+*   **What it does:** Intends to calculate aggregate values (max, average, min, based on `colModel`'s `footerValue`) for columns and set them in the grid's footer. **Note:** The provided code has a potential issue with local `footerData` variable usage.
+*   **What it's for:** To display summary statistics like max, average, and minimum in the jqGrid footer.
+*   **What it returns:** `undefined` (implicitly).
+*   **What the return means:** No value is returned.
+*   **If it throws:** Does not explicitly throw; potential runtime error due to variable usage.
+*   **Parameters:**
+    *   `ev (Event)`: The event object (e.g., from `jqGridAfterLoadComplete`), where `ev.target` is the grid.
+
+###### `footerColumnTotal`
+*   **Signature:** `footerColumnTotal: function(ev)`
+*   **What it does:** Calculates and sets totals (or other aggregates like 'sum', 'max' specified by `footerValue` in `colModel`) for columns in the jqGrid footer, typically on an event like `jqGridAfterLoadComplete`.
+*   **What it's for:** To display column-wise aggregations (e.g., sum of quantities) in the footer row(s) of the grid.
+*   **What it returns:** `undefined` (implicitly).
+*   **What the return means:** No value is returned.
+*   **If it throws:** Does not explicitly throw.
+*   **Parameters:**
+    *   `ev (Event)`: The event object (e.g., from `jqGridAfterLoadComplete`), where `ev.target` is the grid.
+
+###### `footerFormatedUserData`
+*   **Signature:** `footerFormatedUserData: function(ev)`
+*   **What it does:** Populates the jqGrid footer using the `userData` object received from the server response. It supports `userData` as a single object (for one footer row) or an array of objects (for multiple footer rows).
+*   **What it's for:** To display pre-calculated summary data (sent by the server) in the grid's footer.
+*   **What it returns:** `undefined` (implicitly).
+*   **What the return means:** No value is returned.
+*   **If it throws:** Does not explicitly throw.
+*   **Parameters:**
+    *   `ev (Event)`: The event object (e.g., from `jqGridAfterLoadComplete`), where `ev.target` is the grid.
+
+### Global Functions
+
+#### `getTemplate`
+*   **Signature (Definition):**
+    ```javascript
+    function getTemplate(mysqlType, options) { /* ... */ }
+    ```
+*   **What it does:** Generates a jqGrid column model configuration by selecting and customizing a base template from `jqGridTemplates` based on the MySQL data type string (e.g., `varchar(N)`, `enum(...)`, `decimal(P,S)`), then merges with any provided `options`.
+*   **What it's for:** To simplify creating jqGrid `colModel` entries by auto-deriving configurations from MySQL type definitions.
+*   **What it returns:** `object` - A jqGrid column configuration object (e.g., with `align`, `width`, `formatter`, `editrules`). Returns an empty object `{}` (extended with `options`) if no specific template matches.
+*   **What the return means:** A set of options ready for a column definition in a jqGrid `colModel`.
+*   **If it throws:** Does not explicitly throw. Malformed `mysqlType` strings might lead to a generic template.
+*   **Parameters:**
+    *   `mysqlType (string)`: The MySQL data type definition string (e.g., "varchar(100)", "decimal(8,2)").
+    *   `options (object)`: Optional object with additional jqGrid column options to merge, overriding template defaults.
+
+#### `colmoAddSelect`
+*   **Signature (Definition):**
+    ```javascript
+    function colmoAddSelect(keyValue) { /* ... */ }
+    ```
+*   **What it does:** Returns a jqGrid column model configuration object for a column that should be rendered as a select (dropdown) for editing and searching.
+*   **What it's for:** To quickly define a jqGrid column as a dropdown list using provided key-value pairs for the select options.
+*   **What it returns:** `object` - A jqGrid column configuration object with `formatter: 'select'`, `edittype: 'select'`, `stype: 'select'`, and populated `editoptions` and `searchoptions`.
+    *   Shape example: `{ formatter: 'select', edittype: 'select', stype: "select", editoptions: { value: keyValue }, searchoptions: { sopt: ['eq','ne'], value: {'':'', ...keyValue } } }`
+*   **What the return means:** A configuration suitable for a jqGrid column that uses a dropdown for data display, editing, and searching.
+*   **If it throws:** Does not explicitly throw. Uses modern JavaScript (spread operator).
+*   **Parameters:**
+    *   `keyValue (object)`: An object where keys are the submission values and values are the display text for the select options (e.g., `{1: 'Active', 2: 'Inactive'}`).
