@@ -3,10 +3,11 @@
 /** @noinspection SqlNoDataSourceInspection */
 
 namespace Ocallit\JqGrider\JqGrider;
-
-use Exception;
+use Ocallit\JqGrider\JqGrider\Filter2Where;
 use Ocallit\Sqler\SqlExecutor;
 use Ocallit\Sqler\SqlUtils;
+
+use Exception;
 use function array_is_list;
 use function array_key_exists;
 use function ceil;
@@ -192,7 +193,7 @@ class JqGridReader {
     }
 
     public function buildWhereClause(): string {
-        $filter2where = new Filter2where();
+        $filter2where = new Filter2Where();
         $where = [];
         if(!empty($this->parameters['filters'])) {
             $filters = $filter2where->filter2where($this->parameters['filters']);

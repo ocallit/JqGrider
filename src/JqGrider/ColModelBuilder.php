@@ -10,7 +10,7 @@ use Ocallit\Sqler\SqlUtils;
 
 
 class ColModelBuilder {
-    protected $version = '1.0.0';
+    protected $version = '1.0.1';
     protected SqlExecutor $sqlExecutor;
     protected array $colModel = [];
     protected DatabaseMetadata $metadata;

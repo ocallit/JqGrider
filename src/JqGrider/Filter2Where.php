@@ -12,7 +12,6 @@ namespace Ocallit\JqGrider\JqGrider;
 
 /**
  * Class Filter2Where jQGrid filter and _searchField to sql where
- * @package ia\JqGrid
  */
 class Filter2Where {
     protected string $version = '1.0.0';
@@ -75,7 +74,7 @@ class Filter2Where {
     protected bool $usesFullText = false;
 
     /**
-     * Filter2where constructor.
+     * Filter2Where constructor.
      * @param array $fullTextFields ['fullTextField1','fullTextField2'] en fulltext cambia cn por match
      * @param int $innodb_ft_min_token_size default 3, en fulltext si una palabra es menor en longitud usa like
      * @param int $innodb_ft_max_token_size default 84, en fulltext si una palabra es mayor en longitud usa like
