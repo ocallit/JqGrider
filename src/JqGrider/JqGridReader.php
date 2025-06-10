@@ -193,10 +193,10 @@ class JqGridReader {
     }
 
     public function buildWhereClause(): string {
-        $filter2where = new Filter2Where();
+        $filter2Where = new Filter2Where();
         $where = [];
         if(!empty($this->parameters['filters'])) {
-            $filters = $filter2where->filter2where($this->parameters['filters']);
+            $filters = $filter2Where->filter2where($this->parameters['filters']);
             if(!empty($filters))
                 $where[] = "($filters)";
         }
@@ -204,7 +204,7 @@ class JqGridReader {
         $searchField = $this->parameters['searchField'] ?? '';
         $searchOper = $this->parameters['searchOper'] ?? '';
         if($search && !empty($searchField) && !empty($searchOper)) {
-            $simpleFilter = $filter2where->rule2sql(['field'=>$searchField, 'op'=> $searchOper, 'data'=>$this->parameters['searchString'] ?? '']);
+            $simpleFilter = $filter2Where->rule2sql(['field'=>$searchField, 'op'=> $searchOper, 'data'=>$this->parameters['searchString'] ?? '']);
             if(!empty($simpleFilter))
                 $where[] = "($simpleFilter)";
         }
